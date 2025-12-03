@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, Search, X, Check, ArrowRight, Tag } from 'lucide-react';
 import { useData } from '@/store';
+import type { Service } from '@/types';
 
 const SERVICE_CATEGORIES = ['All', 'Hair Services', 'Skin Care', 'Hands & Feet Care', 'Bridal & Grooming', 'Waxing', 'Threading', 'Nail Studio', 'Packages'];
 
@@ -26,7 +27,7 @@ const Step1_Services: React.FC<Step1ServicesProps> = ({
 }) => {
     const { services } = useData();
 
-    const getServicePrice = (s: any) => s.price * (1 - (s.discount || 0) / 100);
+    const getServicePrice = (s: Service) => s.price * (1 - (s.discount || 0) / 100);
 
     return (
         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-right-8 duration-500 pb-48 md:pb-0 px-4 md:px-6 lg:px-8 pt-12 md:pt-16">

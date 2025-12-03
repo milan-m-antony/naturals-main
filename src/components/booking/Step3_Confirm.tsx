@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Calendar, Clock, ChevronLeft, Info, CreditCard, Wallet, Banknote, Loader2, Check } from 'lucide-react';
+import type { Service } from '@/types';
 
 interface Step3ConfirmProps {
     onConfirm: () => void;
     onBack: () => void;
     totalAmount: number;
-    selectedServices: any[];
+    selectedServices: Service[];
     bookingData: { date: string; time: string; userName: string; userEmail: string; userPhone: string };
     setBookingData: React.Dispatch<React.SetStateAction<any>>;
     isUserAuthenticated: boolean;
@@ -64,7 +65,7 @@ const Step3_Confirm: React.FC<Step3ConfirmProps> = ({
 
     const isFormValid = bookingData.userName && bookingData.userEmail && bookingData.userPhone;
     
-    const getServicePrice = (s: any) => s.price * (1 - (s.discount || 0)/100);
+    const getServicePrice = (s: Service) => s.price * (1 - (s.discount || 0)/100);
 
     const handlePaymentAndConfirm = () => {
         if (paymentMethod === 'venue') {

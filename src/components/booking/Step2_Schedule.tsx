@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, Calendar, Clock, ChevronRight, Plus, Tag, X, Info } from 'lucide-react';
+import type { Service } from '@/types';
 
 interface Step2ScheduleProps {
     onBack: () => void;
@@ -12,7 +13,7 @@ interface Step2ScheduleProps {
     weekDays: string[];
     daysArray: React.ReactElement[];
     timeSlots: string[];
-    selectedServices: any[];
+    selectedServices: Service[];
     subTotal: number;
     discountAmount: number;
     taxAmount: number;

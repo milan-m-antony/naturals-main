@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from '@/store';
-import type { Appointment } from '@/types';
+import type { Appointment, Service } from '@/types';
 
 // Import new step components
 import Step0_Dashboard from './Step0_Dashboard';
@@ -195,7 +195,7 @@ const BookingWizard: React.FC<BookingWizardProps> = ({
     setBookingData(prev => ({ ...prev, serviceIds: [] }));
   };
 
-  const getServicePrice = (s: any) => s.price * (1 - (s.discount || 0)/100);
+  const getServicePrice = (s: Service) => s.price * (1 - (s.discount || 0)/100);
 
   const selectedServices = services.filter(s => bookingData.serviceIds.includes(s.id));
   const subTotal = selectedServices.reduce((sum, s) => sum + getServicePrice(s), 0);
