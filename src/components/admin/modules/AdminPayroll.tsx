@@ -8,11 +8,17 @@ const AdminPayroll: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Calculate payroll data
+  const getBaseSalary = (memberId: number) => {
+    // Get from localStorage or default
+    const salaries = JSON.parse(localStorage.getItem('staff_salaries') || '{}');
+    return salaries[memberId] || 15000;
+  };
+
   const payrollData = staff.map(member => {
     const memberAppointments = appointments.filter(a => a.staffId === member.id && a.status === 'Completed');
     const totalRevenue = memberAppointments.reduce((sum, a) => sum + a.price, 0);
     const completedCount = memberAppointments.length;
-    const baseSalary = 15000; // Mock base
+    const baseSalary = getBaseSalary(member.id);
     const commissionRate = 0.10; // 10%
     const commission = totalRevenue * commissionRate;
     const totalPayout = baseSalary + commission;

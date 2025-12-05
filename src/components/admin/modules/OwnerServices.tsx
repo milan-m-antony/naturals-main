@@ -19,6 +19,8 @@ const OwnerServices: React.FC = () => {
   };
   
   const [formData, setFormData] = useState(initialFormState);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const handleEdit = (service: Service) => {
     setEditingService(service);
@@ -30,6 +32,7 @@ const OwnerServices: React.FC = () => {
       description: service.description,
       discount: service.discount || 0
     });
+    setSelectedImage(service.image || '');
     setIsModalOpen(true);
   };
 
@@ -42,19 +45,61 @@ const OwnerServices: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingService) {
-      updateService(editingService.id, formData);
+      updateService(editingService.id, { ...formData, image: selectedImage });
     } else {
-      addService({ ...formData, image: 'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80&w=400' }); // Mock image
+      addService({ ...formData, image: selectedImage });
     }
     setIsModalOpen(false);
     setEditingService(null);
     setFormData(initialFormState);
+    setSelectedImage('');
   };
 
   const handleAddNew = () => {
       setEditingService(null);
       setFormData(initialFormState);
+      setSelectedImage('');
       setIsModalOpen(true);
+  };
+
+  const getMediaLibraryImages = (): string[] => {
+    const saved = localStorage.getItem('media_library');
+    if (!saved) return [];
+    const media = JSON.parse(saved);
+    return media.filter((item: any) => item.type === 'service').map((item: any) => item.url);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      
+      // Save to media library
+      const saved = localStorage.getItem('media_library');
+      const media = saved ? JSON.parse(saved) : [];
+      const newItem = {
+        id: Date.now(),
+        url: imageUrl,
+        name: file.name,
+        type: 'service',
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        uploadedAt: new Date().toISOString()
+      };
+      media.push(newItem);
+      localStorage.setItem('media_library', JSON.stringify(media));
+      
+      // Set as selected image
+      setSelectedImage(imageUrl);
+      setUploadingImage(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -134,6 +179,45 @@ const OwnerServices: React.FC = () => {
                  <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
                     <textarea rows={3} required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-gray-50 dark:bg-neutral-700 p-3 rounded-lg text-sm outline-none dark:text-white resize-none" />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Service Image</label>
+                    
+                    {/* Upload Button */}
+                    <div className="mb-3">
+                      <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                        <ImageIcon className="w-4 h-4" />
+                        {uploadingImage ? 'Uploading...' : 'Upload New Image'}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          disabled={uploadingImage}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Image Grid */}
+                    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 bg-gray-50 dark:bg-neutral-700 rounded-lg">
+                      {getMediaLibraryImages().length === 0 ? (
+                        <div className="col-span-4 text-center py-4 text-sm text-gray-500">
+                          No service images uploaded. Upload an image above or go to Media Library.
+                        </div>
+                      ) : (
+                        getMediaLibraryImages().map((img, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => setSelectedImage(img)}
+                            className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                              selectedImage === img ? 'border-black dark:border-white' : 'border-transparent hover:border-gray-300'
+                            }`}
+                          >
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        ))
+                      )}
+                    </div>
                  </div>
                  <button type="submit" className="w-full bg-black dark:bg-white text-white dark:text-black py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity mt-4">
                     {editingService ? 'Update Service' : 'Create Service'}

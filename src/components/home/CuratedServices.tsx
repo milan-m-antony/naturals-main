@@ -43,12 +43,13 @@ const CuratedServices: React.FC<CuratedServicesProps> = ({ onNavigate }) => {
 
   // State for Skin Card Animation
   const [skinFeatureIndex, setSkinFeatureIndex] = useState(0);
-  const skinFeatures = ["RADIANCE", "HYDRATION", "YOUTH", "GLOW"];
+  const [skinFeatures, setSkinFeatures] = useState(["RADIANCE", "HYDRATION", "YOUTH", "GLOW"]);
+  const [skinImage, setSkinImage] = useState("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=800");
 
   // State for Bridal Card Animation
   const [bridalIndex, setBridalIndex] = useState(0);
   
-  const bridalSlides = [
+  const [bridalSlides, setBridalSlides] = useState([
     { 
       id: 1, 
       image: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&q=80&w=800",
@@ -67,23 +68,49 @@ const CuratedServices: React.FC<CuratedServicesProps> = ({ onNavigate }) => {
       title: "Pre-Wedding",
       subtitle: "Glow Treatments"
     }
-  ];
+  ]);
+
+  const [sectionTitle, setSectionTitle] = useState("Curated Services");
+  const [sectionDescription, setSectionDescription] = useState("Expertly designed treatments using premium organic products.");
+
+  // Load data from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('curated_services');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.sectionTitle) setSectionTitle(data.sectionTitle);
+        if (data.sectionDescription) setSectionDescription(data.sectionDescription);
+        if (data.skinFeatures && Array.isArray(data.skinFeatures) && data.skinFeatures.length > 0) {
+          setSkinFeatures(data.skinFeatures.map((f: any) => f.text));
+        }
+        if (data.skinImage) setSkinImage(data.skinImage);
+        if (data.bridalSlides && Array.isArray(data.bridalSlides) && data.bridalSlides.length > 0) {
+          setBridalSlides(data.bridalSlides);
+        }
+      } catch (error) {
+        console.error('Failed to parse curated services data:', error);
+      }
+    }
+  }, []);
 
   // Skin Animation Timer
   useEffect(() => {
+    if (skinFeatures.length === 0) return;
     const interval = setInterval(() => {
       setSkinFeatureIndex((prev) => (prev + 1) % skinFeatures.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [skinFeatures.length]);
 
   // Bridal Slider Timer
   useEffect(() => {
+    if (bridalSlides.length === 0) return;
     const interval = setInterval(() => {
       setBridalIndex((prev) => (prev + 1) % bridalSlides.length);
     }, 3000); // Slides every 3 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [bridalSlides.length]);
 
   return (
     <section className="bg-[#FDFBF7] dark:bg-neutral-950 py-12 md:py-16 px-4 md:px-6 lg:px-8 text-gray-900 dark:text-white overflow-hidden relative transition-colors duration-500">
@@ -92,9 +119,9 @@ const CuratedServices: React.FC<CuratedServicesProps> = ({ onNavigate }) => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-12 gap-4 md:gap-6">
           <div className="max-w-lg">
-            <h2 className="font-display text-4xl md:text-5xl font-bold italic mb-3 leading-tight text-gray-900 dark:text-white">Curated Services</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold italic mb-3 leading-tight text-gray-900 dark:text-white">{sectionTitle}</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Expertly designed treatments using premium organic products.
+              {sectionDescription}
             </p>
           </div>
           
@@ -162,9 +189,12 @@ const CuratedServices: React.FC<CuratedServicesProps> = ({ onNavigate }) => {
             className="group relative h-[300px] md:h-[420px] rounded-[2.5rem] overflow-hidden cursor-pointer bg-black shadow-sm hover:shadow-2xl transition-all duration-500"
           >
              <img 
-               src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=800" 
+               src={skinImage} 
                alt="Skin Lounge" 
                className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-700 group-hover:scale-105"
+               onError={(e) => {
+                 e.currentTarget.src = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=800";
+               }}
              />
              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                 <div className="mb-6 bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/10">
@@ -172,9 +202,11 @@ const CuratedServices: React.FC<CuratedServicesProps> = ({ onNavigate }) => {
                 </div>
                 <p className="text-white/60 text-xs font-bold tracking-[0.3em] uppercase mb-4">Experience</p>
                 <div className="h-16 flex items-center justify-center overflow-hidden">
-                   <h3 key={skinFeatureIndex} className="font-display text-4xl md:text-5xl font-black italic text-white tracking-tighter animate-in slide-in-from-bottom-8 fade-in duration-500">
-                      {skinFeatures[skinFeatureIndex]}
-                   </h3>
+                   {skinFeatures.length > 0 && (
+                     <h3 key={skinFeatureIndex} className="font-display text-4xl md:text-5xl font-black italic text-white tracking-tighter animate-in slide-in-from-bottom-8 fade-in duration-500">
+                        {skinFeatures[skinFeatureIndex]}
+                     </h3>
+                   )}
                 </div>
                 <div className="mt-8 h-1 w-12 bg-white/20 rounded-full overflow-hidden">
                    <div className="h-full bg-yellow-400 w-full animate-[shimmer_2s_infinite]"></div>

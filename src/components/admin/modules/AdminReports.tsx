@@ -1,11 +1,39 @@
 
 import React from 'react';
 import { TrendingUp, Users, DollarSign, Calendar } from 'lucide-react';
+import { useData } from '@/store';
 
 const AdminReports: React.FC = () => {
-  // Mock Data for Charts
-  const revenueData = [45, 60, 75, 50, 80, 95, 85]; // Percentages for bars
+  const { appointments, staff } = useData();
+
+  // Calculate real metrics from data
+  const completedAppointments = appointments.filter(a => a.status === 'Completed');
+  const totalRevenue = completedAppointments.reduce((sum, a) => sum + a.price, 0);
+  const avgOrderValue = completedAppointments.length > 0 ? Math.round(totalRevenue / completedAppointments.length) : 0;
+
+  // Top performer
+  const staffPerformance = staff.map(member => ({
+    ...member,
+    appointmentCount: appointments.filter(a => a.staffId === member.id && a.status === 'Completed').length
+  })).sort((a, b) => b.appointmentCount - a.appointmentCount);
+  const topPerformer = staffPerformance[0];
+
+  // Weekly revenue data (last 7 days)
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    return date.toISOString().split('T')[0];
+  });
+
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const revenueData = last7Days.map(date => {
+    const dayAppointments = completedAppointments.filter(a => a.date === date);
+    const dayRevenue = dayAppointments.reduce((sum, a) => sum + a.price, 0);
+    return dayRevenue;
+  });
+
+  const maxRevenue = Math.max(...revenueData, 1);
+  const revenuePercentages = revenueData.map(rev => (rev / maxRevenue) * 100);
 
   return (
     <div className="space-y-6">
@@ -19,32 +47,34 @@ const AdminReports: React.FC = () => {
        {/* Metrics Cards */}
        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-gray-200 dark:border-neutral-700">
-             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Customer Retention</p>
+             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Total Revenue</p>
              <div className="flex items-end gap-2">
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">85%</h3>
-                <span className="text-xs font-bold text-green-500 mb-1 flex items-center"><TrendingUp className="w-3 h-3 mr-1" /> +2.4%</span>
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">₹{totalRevenue.toLocaleString()}</h3>
              </div>
-             <div className="w-full bg-gray-100 dark:bg-neutral-700 h-1.5 rounded-full mt-4 overflow-hidden">
-                <div className="bg-blue-500 h-full rounded-full" style={{ width: '85%' }}></div>
-             </div>
+             <p className="text-[10px] text-gray-400 mt-4">From {completedAppointments.length} completed appointments</p>
           </div>
           <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-gray-200 dark:border-neutral-700">
              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Avg. Order Value</p>
              <div className="flex items-end gap-2">
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">₹1,250</h3>
-                <span className="text-xs font-bold text-green-500 mb-1 flex items-center"><TrendingUp className="w-3 h-3 mr-1" /> +5%</span>
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">₹{avgOrderValue.toLocaleString()}</h3>
              </div>
-             <p className="text-[10px] text-gray-400 mt-4">Based on last 30 days transactions</p>
+             <p className="text-[10px] text-gray-400 mt-4">Based on all completed appointments</p>
           </div>
           <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-gray-200 dark:border-neutral-700">
              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Top Performer</p>
-             <div className="flex items-center gap-4 mt-2">
-                <img src="https://i.pravatar.cc/150?u=1" className="w-12 h-12 rounded-full border-2 border-yellow-400" alt="Jane" />
-                <div>
-                   <h4 className="font-bold text-gray-900 dark:text-white">Jane Doe</h4>
-                   <p className="text-xs text-gray-500">Senior Stylist • 42 Appts</p>
-                </div>
-             </div>
+             {topPerformer ? (
+               <div className="flex items-center gap-4 mt-2">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    {topPerformer.name.charAt(0)}
+                  </div>
+                  <div>
+                     <h4 className="font-bold text-gray-900 dark:text-white">{topPerformer.name}</h4>
+                     <p className="text-xs text-gray-500">{topPerformer.appointmentCount} Appointments</p>
+                  </div>
+               </div>
+             ) : (
+               <p className="text-sm text-gray-500 mt-2">No data available</p>
+             )}
           </div>
        </div>
 
@@ -59,17 +89,17 @@ const AdminReports: React.FC = () => {
           </div>
           
           <div className="h-48 flex items-end justify-between gap-2 md:gap-4 px-2">
-             {revenueData.map((height, idx) => (
+             {revenuePercentages.map((height, idx) => (
                 <div key={idx} className="flex flex-col items-center flex-1 group cursor-pointer">
                    <div className="relative w-full max-w-[40px] flex items-end h-40 bg-gray-50 dark:bg-neutral-900 rounded-t-lg overflow-hidden">
                       {/* Bar */}
                       <div 
                         className="w-full bg-black dark:bg-white group-hover:opacity-80 transition-all duration-500 ease-out" 
-                        style={{ height: `${height}%` }}
+                        style={{ height: `${height || 5}%` }}
                       ></div>
                       {/* Tooltip */}
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                         ₹{height * 100}
+                         ₹{revenueData[idx].toLocaleString()}
                       </div>
                    </div>
                    <span className="text-[10px] font-bold text-gray-400 mt-2 uppercase">{days[idx]}</span>

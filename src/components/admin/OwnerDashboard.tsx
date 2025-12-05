@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { TrendingUp, FileText, Settings, Users, Calendar, Sparkles, Box } from 'lucide-react';
+import { TrendingUp, FileText, Settings, Users, Calendar, Sparkles, Box, Image, Megaphone, Ticket, Layout, Grid, Layers } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import { useData } from '@/store';
 
@@ -12,6 +12,12 @@ import AdminInventory from './modules/AdminInventory';
 import AdminReports from './modules/AdminReports';
 import OwnerServices from './modules/OwnerServices'; // New Module
 import OwnerSettings from './modules/OwnerSettings'; // New Module
+import AdminMedia from './modules/AdminMedia'; // Media Management
+import OwnerBanners from './modules/OwnerBanners'; // Banner Management
+import OwnerCoupons from './modules/OwnerCoupons'; // Coupon Management
+import OwnerCategories from './modules/OwnerCategories'; // Category Management
+import OwnerHero from './modules/OwnerHero'; // Hero Slides Management
+import OwnerCuratedServices from './modules/OwnerCuratedServices'; // Curated Services Management
 
 interface DashboardCommonProps {
   user: { role: string };
@@ -40,6 +46,19 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
     { id: 'inventory', label: 'Inventory', icon: Box },
     { id: 'reports', label: 'Analytics & Reports', icon: FileText },
     { id: 'services', label: 'Service Menu', icon: Sparkles },
+    { 
+      id: 'content', 
+      label: 'Content Management', 
+      icon: Layers,
+      submenu: [
+        { id: 'categories', label: 'Service Categories', icon: Grid },
+        { id: 'hero', label: 'Hero Carousel', icon: Layout },
+        { id: 'curated', label: 'Curated Services', icon: Sparkles },
+        { id: 'coupons', label: 'Discount Coupons', icon: Ticket },
+        { id: 'banners', label: 'Promotional Banners', icon: Megaphone },
+        { id: 'media', label: 'Media Library', icon: Image },
+      ]
+    },
     { id: 'settings', label: 'Shop Settings', icon: Settings },
   ];
 
@@ -57,6 +76,18 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
         return <AdminReports />;
       case 'services':
          return <OwnerServices />;
+      case 'categories':
+        return <OwnerCategories />;
+      case 'hero':
+        return <OwnerHero />;
+      case 'curated':
+        return <OwnerCuratedServices />;
+      case 'coupons':
+        return <OwnerCoupons />;
+      case 'banners':
+        return <OwnerBanners />;
+      case 'media':
+        return <AdminMedia />;
       case 'settings':
         return <OwnerSettings />;
       default:

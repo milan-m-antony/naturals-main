@@ -1,64 +1,85 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Copy, Check } from 'lucide-react';
 
 interface UserOffersProps {
   showToast: (msg: string, type?: 'success' | 'loading') => void;
 }
 
+interface Offer {
+  id: number;
+  discount: string;
+  offText: string;
+  service: string;
+  code: string;
+  tag: string;
+  bg: string;
+  text: string;
+  border: string;
+  copyBtn: string;
+}
+
+const DEFAULT_OFFERS: Offer[] = [
+  { 
+      id: 1, 
+      discount: '50%', 
+      offText: 'OFF',
+      service: 'Facials', 
+      code: 'GLOW50', 
+      tag: 'LIMITED', 
+      bg: 'bg-[#FFC107] dark:bg-[#ECA609]',
+      text: 'text-black',
+      border: 'border-black/10',
+      copyBtn: 'bg-white/90 text-black hover:bg-white'
+  },
+  { 
+      id: 2, 
+      discount: '10%', 
+      offText: 'New',
+      service: 'User Bonus', 
+      code: 'WELCOME10', 
+      tag: 'LIMITED', 
+      bg: 'bg-[#8B5CF6] dark:bg-[#7C3AED]',
+      text: 'text-white',
+      border: 'border-white/20',
+      copyBtn: 'bg-white/20 text-white hover:bg-white/30'
+  },
+  { 
+      id: 3, 
+      discount: '20%', 
+      offText: 'OFF',
+      service: 'Hair Spa', 
+      code: 'SPA20', 
+      tag: 'LIMITED', 
+      bg: 'bg-[#10B981] dark:bg-[#059669]',
+      text: 'text-white',
+      border: 'border-white/20',
+      copyBtn: 'bg-white/20 text-white hover:bg-white/30'
+  },
+  { 
+      id: 4, 
+      discount: '15%', 
+      offText: 'OFF',
+      service: '(Students)', 
+      code: 'STUDENT15', 
+      tag: 'LIMITED', 
+      bg: 'bg-[#06B6D4] dark:bg-[#0891B2]',
+      text: 'text-white',
+      border: 'border-white/20',
+      copyBtn: 'bg-white/20 text-white hover:bg-white/30'
+  },
+];
+
 const UserOffers: React.FC<UserOffersProps> = ({ showToast }) => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [activeOffers, setActiveOffers] = useState<Offer[]>(() => {
+    const saved = localStorage.getItem('user_offers');
+    return saved ? JSON.parse(saved) : DEFAULT_OFFERS;
+  });
 
-  const activeOffers = [
-    { 
-        id: 1, 
-        discount: '50%', 
-        offText: 'OFF',
-        service: 'Facials', 
-        code: 'GLOW50', 
-        tag: 'LIMITED', 
-        bg: 'bg-[#FFC107] dark:bg-[#ECA609]', // Amber/Yellow
-        text: 'text-black',
-        border: 'border-black/10',
-        copyBtn: 'bg-white/90 text-black hover:bg-white'
-    },
-    { 
-        id: 2, 
-        discount: '10%', 
-        offText: 'New',
-        service: 'User Bonus', 
-        code: 'WELCOME10', 
-        tag: 'LIMITED', 
-        bg: 'bg-[#8B5CF6] dark:bg-[#7C3AED]', // Purple
-        text: 'text-white',
-        border: 'border-white/20',
-        copyBtn: 'bg-white/20 text-white hover:bg-white/30'
-    },
-    { 
-        id: 3, 
-        discount: '20%', 
-        offText: 'OFF',
-        service: 'Hair Spa', 
-        code: 'SPA20', 
-        tag: 'LIMITED', 
-        bg: 'bg-[#10B981] dark:bg-[#059669]', // Emerald/Green
-        text: 'text-white',
-        border: 'border-white/20',
-        copyBtn: 'bg-white/20 text-white hover:bg-white/30'
-    },
-    { 
-        id: 4, 
-        discount: '15%', 
-        offText: 'OFF',
-        service: '(Students)', 
-        code: 'STUDENT15', 
-        tag: 'LIMITED', 
-        bg: 'bg-[#06B6D4] dark:bg-[#0891B2]', // Cyan/Blue
-        text: 'text-white',
-        border: 'border-white/20',
-        copyBtn: 'bg-white/20 text-white hover:bg-white/30'
-    },
-  ];
+  useEffect(() => {
+    localStorage.setItem('user_offers', JSON.stringify(activeOffers));
+  }, [activeOffers]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);

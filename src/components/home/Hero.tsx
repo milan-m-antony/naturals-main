@@ -6,7 +6,7 @@ interface HeroProps {
   onBookClick: () => void;
 }
 
-const SLIDES = [
+const DEFAULT_SLIDES = [
   {
     id: 1,
     image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=1200',
@@ -61,8 +61,25 @@ const SLIDES = [
 
 const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
   const [slideState, setSlideState] = useState({ current: 0, previous: null as number | null });
+  const [SLIDES, setSLIDES] = useState(DEFAULT_SLIDES);
 
   useEffect(() => {
+    const saved = localStorage.getItem('hero_slides');
+    if (saved) {
+      try {
+        const slides = JSON.parse(saved);
+        if (Array.isArray(slides) && slides.length > 0) {
+          setSLIDES(slides);
+        }
+      } catch (error) {
+        console.error('Failed to parse hero slides from localStorage:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (SLIDES.length === 0) return;
+    
     const timer = setInterval(() => {
       setSlideState(prev => ({
           current: (prev.current + 1) % SLIDES.length,
@@ -71,9 +88,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
     }, 5000); 
 
     return () => clearInterval(timer);
-  }, []);
+  }, [SLIDES.length]);
 
-  const slide = SLIDES[slideState.current];
+  // Safely get current slide with fallback
+  const slide = SLIDES[slideState.current] || SLIDES[0] || DEFAULT_SLIDES[0];
+  
+  if (!slide) {
+    return null; // Safety check
+  }
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-center overflow-hidden bg-[#FDFBF7] dark:bg-neutral-950 transition-colors duration-500">
@@ -191,9 +213,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
                   `}
                 >
                   <img 
-                    src={s.image} 
-                    alt={s.title} 
+                    src={s.image || ''} 
+                    alt={s.title || 'Hero slide'} 
                     className="w-full h-full object-cover rounded-[3rem] shadow-2xl"
+                    onError={(e) => {
+                      // Fallback for broken images
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=1200';
+                    }}
                   />
                 </div>
               )

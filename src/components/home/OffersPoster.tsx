@@ -5,7 +5,21 @@ interface OffersPosterProps {
   onExplore: () => void;
 }
 
-const POSTERS = [
+interface Banner {
+  id: number;
+  tag: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  bgImage: string;
+  ctaText: string;
+  theme: {
+    tagBg: string;
+    subtitleColor: string;
+  };
+}
+
+const DEFAULT_POSTERS = [
   {
     id: 1,
     tag: "Limited Time",
@@ -50,6 +64,18 @@ const POSTERS = [
 const OffersPoster: React.FC<OffersPosterProps> = ({ onExplore }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [POSTERS, setPOSTERS] = useState<Banner[]>(DEFAULT_POSTERS);
+
+    // Load banners from localStorage
+    useEffect(() => {
+      const saved = localStorage.getItem('banners');
+      if (saved) {
+        const banners = JSON.parse(saved);
+        if (banners.length > 0) {
+          setPOSTERS(banners);
+        }
+      }
+    }, []);
 
     useEffect(() => {
         if (isPaused) return;
@@ -57,7 +83,7 @@ const OffersPoster: React.FC<OffersPosterProps> = ({ onExplore }) => {
             setCurrentIndex(prev => (prev + 1) % POSTERS.length);
         }, 5000);
         return () => clearInterval(timer);
-    }, [isPaused]);
+    }, [isPaused, POSTERS.length]);
 
     const handleNext = () => {
         setCurrentIndex(prev => (prev + 1) % POSTERS.length);

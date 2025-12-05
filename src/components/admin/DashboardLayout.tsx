@@ -1,12 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, Sun, Moon, Bell, Menu, X, ChevronRight, User } from 'lucide-react';
+import { LogOut, Sun, Moon, Bell, Menu, X, ChevronRight, ChevronDown, User } from 'lucide-react';
+
+interface SubMenuItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+}
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  submenu?: SubMenuItem[];
+}
 
 interface DashboardLayoutProps {
   user: { role: string } | null;
   onLogout: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
-  sidebarNavItems: { id: string; label: string; icon: React.ElementType }[];
+  sidebarNavItems: NavItem[];
   activeModule: string;
   setActiveModule: (module: string) => void;
   pageTitle: string;
@@ -34,6 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   
   // Close dropdowns when clicking outside
   const notifRef = useRef<HTMLDivElement>(null);
@@ -84,22 +98,59 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
            <p className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">Menu</p>
            {sidebarNavItems.map((item) => (
-             <button
-               key={item.id}
-               onClick={() => { setActiveModule(item.id); setIsSidebarOpen(false); }}
-               className={`
-                 w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group
-                 ${activeModule === item.id 
-                   ? 'bg-black dark:bg-white text-white dark:text-black shadow-lg' 
-                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}
-               `}
-             >
-               <div className="flex items-center gap-3">
-                 <item.icon className={`w-5 h-5 ${activeModule === item.id ? 'text-yellow-400 dark:text-black' : 'text-gray-400 group-hover:text-black dark:group-hover:text-white'}`} />
-                 <span>{item.label}</span>
-               </div>
-               {activeModule === item.id && <ChevronRight className="w-4 h-4 opacity-50" />}
-             </button>
+             <div key={item.id}>
+               <button
+                 onClick={() => {
+                   if (item.submenu) {
+                     setExpandedMenus(prev => 
+                       prev.includes(item.id) 
+                         ? prev.filter(id => id !== item.id)
+                         : [...prev, item.id]
+                     );
+                   } else {
+                     setActiveModule(item.id);
+                     setIsSidebarOpen(false);
+                   }
+                 }}
+                 className={`
+                   w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group
+                   ${!item.submenu && activeModule === item.id 
+                     ? 'bg-black dark:bg-white text-white dark:text-black shadow-lg' 
+                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}
+                 `}
+               >
+                 <div className="flex items-center gap-3">
+                   <item.icon className={`w-5 h-5 ${!item.submenu && activeModule === item.id ? 'text-yellow-400 dark:text-black' : 'text-gray-400 group-hover:text-black dark:group-hover:text-white'}`} />
+                   <span>{item.label}</span>
+                 </div>
+                 {item.submenu ? (
+                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${expandedMenus.includes(item.id) ? 'rotate-180' : ''}`} />
+                 ) : (
+                   activeModule === item.id && <ChevronRight className="w-4 h-4 opacity-50" />
+                 )}
+               </button>
+               
+               {/* Submenu Items */}
+               {item.submenu && expandedMenus.includes(item.id) && (
+                 <div className="ml-4 mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                   {item.submenu.map((subitem) => (
+                     <button
+                       key={subitem.id}
+                       onClick={() => { setActiveModule(subitem.id); setIsSidebarOpen(false); }}
+                       className={`
+                         w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 group
+                         ${activeModule === subitem.id 
+                           ? 'bg-black/90 dark:bg-white/90 text-white dark:text-black shadow-md' 
+                           : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white'}
+                       `}
+                     >
+                       <subitem.icon className={`w-4 h-4 ${activeModule === subitem.id ? 'text-yellow-400 dark:text-black' : 'text-gray-400 group-hover:text-black dark:group-hover:text-white'}`} />
+                       <span>{subitem.label}</span>
+                     </button>
+                   ))}
+                 </div>
+               )}
+             </div>
            ))}
         </div>
 

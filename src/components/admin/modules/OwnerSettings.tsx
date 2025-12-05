@@ -1,36 +1,50 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Clock, MapPin, Phone, Mail, Globe } from 'lucide-react';
 
 const OwnerSettings: React.FC = () => {
-  const [shopDetails, setShopDetails] = useState({
-    name: 'Naturals Salon Kanjirappally',
-    address: 'Loyola Arcade, Puthenangadi Jn, Kanjirappally, Kerala 686507',
-    phone: '+91 97444 88822',
-    email: 'kanjirappally@naturals.com',
-    website: 'www.naturals.in',
-    gstin: '32ABCDE1234F1Z5'
+  const [shopDetails, setShopDetails] = useState(() => {
+    const saved = localStorage.getItem('shop_settings');
+    return saved ? JSON.parse(saved) : {
+      name: 'Naturals Salon Kanjirappally',
+      address: 'Loyola Arcade, Puthenangadi Jn, Kanjirappally, Kerala 686507',
+      phone: '+91 97444 88822',
+      email: 'kanjirappally@naturals.com',
+      website: 'www.naturals.in',
+      gstin: '32ABCDE1234F1Z5'
+    };
   });
 
-  const [hours, setHours] = useState({
-    open: '09:00',
-    close: '20:00'
+  const [hours, setHours] = useState(() => {
+    const saved = localStorage.getItem('shop_hours');
+    return saved ? JSON.parse(saved) : {
+      open: '09:00',
+      close: '20:00'
+    };
   });
+
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShopDetails({ ...shopDetails, [e.target.name]: e.target.value });
   };
 
   const handleSave = () => {
-    alert('Settings saved successfully!');
+    localStorage.setItem('shop_settings', JSON.stringify(shopDetails));
+    localStorage.setItem('shop_hours', JSON.stringify(hours));
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   return (
     <div className="space-y-6">
        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Shop Settings</h2>
-          <button onClick={handleSave} className="bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:opacity-90">
-             <Save className="w-4 h-4" /> Save Changes
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Shop Settings</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure your shop details and operating hours</p>
+          </div>
+          <button onClick={handleSave} className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${saveSuccess ? 'bg-green-500 text-white' : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-90'}`}>
+             <Save className="w-4 h-4" /> {saveSuccess ? 'Saved!' : 'Save Changes'}
           </button>
        </div>
 

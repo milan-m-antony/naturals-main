@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, FileText, Printer, Box, TrendingUp } from 'lucide-react';
+import { Calendar, Users, FileText, Printer, Box, TrendingUp, Image, Megaphone, Ticket } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import { useData } from '@/store';
 
@@ -11,7 +11,10 @@ import AdminStaff from './modules/AdminStaff';
 import AdminPayroll from './modules/AdminPayroll';
 import AdminPOS from './modules/AdminPOS';
 import AdminReports from './modules/AdminReports';
-import AdminInventory from './modules/AdminInventory'; 
+import AdminInventory from './modules/AdminInventory';
+import AdminMedia from './modules/AdminMedia';
+import OwnerBanners from './modules/OwnerBanners';
+import OwnerCoupons from './modules/OwnerCoupons'; 
 
 interface DashboardCommonProps {
   user: { role: string };
@@ -53,6 +56,9 @@ const AdminDashboard: React.FC<DashboardCommonProps> = (props) => {
     { id: 'pos', label: 'Point of Sale', icon: Printer },
     { id: 'payroll', label: 'Payroll', icon: FileText },
     { id: 'reports', label: 'Reports', icon: FileText },
+    { id: 'coupons', label: 'Coupons', icon: Ticket },
+    { id: 'banners', label: 'Banners', icon: Megaphone },
+    { id: 'media', label: 'Media Library', icon: Image },
   ];
 
   const renderContent = () => {
@@ -71,6 +77,12 @@ const AdminDashboard: React.FC<DashboardCommonProps> = (props) => {
         return <AdminPOS />;
       case 'reports':
         return <AdminReports />;
+      case 'coupons':
+        return <OwnerCoupons />;
+      case 'banners':
+        return <OwnerBanners />;
+      case 'media':
+        return <AdminMedia />;
       default:
         return <div>Module coming soon.</div>;
     }

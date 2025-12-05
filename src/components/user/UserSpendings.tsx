@@ -14,7 +14,15 @@ const UserSpendings: React.FC<UserSpendingsProps> = ({ appointments, showToast }
 
   const completedApts = appointments.filter(a => a.status === 'Completed');
   const totalSpent = completedApts.reduce((sum, item) => sum + item.price, 0);
-  const totalSaved = Math.round(totalSpent * 0.15); // Mock savings
+  
+  // Calculate real savings from discounts
+  const totalSaved = completedApts.reduce((sum, apt) => {
+    // Check if service has discount
+    const discountPercent = apt.discount || 0;
+    const originalPrice = Math.round(apt.price / (1 - discountPercent / 100));
+    const saved = originalPrice - apt.price;
+    return sum + (saved > 0 ? saved : 0);
+  }, 0);
 
   const handleDownload = (type: string) => {
     showToast(`Generating ${type}...`, 'loading');
