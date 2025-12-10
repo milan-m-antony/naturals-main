@@ -48,4 +48,19 @@ class Service extends Model
     {
         return $this->belongsToMany(User::class, 'user_favorites');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(ServiceReview::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    public function getTotalReviewsAttribute()
+    {
+        return $this->reviews()->count();
+    }
 }

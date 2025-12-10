@@ -12,9 +12,13 @@ import BottomNav from '@/components/layout/BottomNav';
 // Home Components
 import Hero from '@/components/home/Hero';
 import CategoryShowcase from '@/components/home/CategoryShowcase';
+import GenderSpecificServices from '@/components/home/GenderSpecificServices';
+import WhyChooseNaturals from '@/components/home/WhyChooseNaturals';
 import CuratedServices from '@/components/home/CuratedServices';
 import ComboOffers from '@/components/home/ComboOffers';
 import OffersPoster from '@/components/home/OffersPoster';
+import TrustAndProof from '@/components/home/TrustAndProof';
+import CustomerReviews from '@/components/home/CustomerReviews';
 
 // Service Components
 import ServiceMenu from '@/components/service/ServiceMenu';
@@ -194,6 +198,8 @@ export const AppContent: React.FC = () => {
           <>
             <Hero onNavigate={handleNavigateWithBooking} onBookClick={handleStartBookingEnhanced} />
             <CategoryShowcase onCategoryClick={handleCategoryClick} />
+            <GenderSpecificServices onCategoryClick={handleCategoryClick} />
+            <WhyChooseNaturals />
             <CuratedServices onNavigate={handleNavigateWithBooking} />
             <OffersPoster onExplore={() => handleNavigate('discounts')} />
             <ComboOffers
@@ -201,6 +207,8 @@ export const AppContent: React.FC = () => {
               onBook={handleBookServiceEnhanced}
               onNavigate={handleNavigateWithBooking}
             />
+            <TrustAndProof />
+            <CustomerReviews />
           </>
         )}
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Store, LogOut, Sun, Moon, Bell, Menu, X,
   LayoutDashboard, Calendar, Wallet, Crown, Tag, Heart, User, Settings,
-  Loader2
+  Loader2, Star
 } from 'lucide-react';
 import { useData } from '@/store';
 import type { Appointment } from '@/types';
@@ -11,6 +11,7 @@ import type { Appointment } from '@/types';
 // Import new User Components
 import UserOverview from '../user/UserOverview';
 import UserBookings from '../user/UserBookings';
+import UserReviews from '../user/UserReviews';
 import UserSpendings from '../user/UserSpendings';
 import UserMembershipCards from '../user/UserMembershipCards';
 import UserOffers from '../user/UserOffers';
@@ -104,6 +105,7 @@ const Step0_Dashboard: React.FC<Step0DashboardProps> = ({
     const navItems = [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
         { id: 'bookings', label: 'My Bookings', icon: Calendar },
+        { id: 'reviews', label: 'My Reviews', icon: Star },
         { id: 'spendings', label: 'Spendings', icon: Wallet },
         { id: 'membership', label: 'Membership', icon: Crown },
         { id: 'offers', label: 'Offers & Rewards', icon: Tag },
@@ -366,6 +368,12 @@ const Step0_Dashboard: React.FC<Step0DashboardProps> = ({
                                 services={services}
                                 staff={staff}
                                 setSelectedBooking={setSelectedBooking}
+                                showToast={showToast}
+                                onNavigateToBooking={() => onNavigate('booking')}
+                            />
+                        )}
+                        {activeTab === 'reviews' && (
+                            <UserReviews 
                                 showToast={showToast}
                             />
                         )}

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { TrendingUp, FileText, Settings, Users, Calendar, Sparkles, Box, Image, Megaphone, Ticket, Layout, Grid, Layers } from 'lucide-react';
+import { TrendingUp, FileText, Settings, Users, Calendar, Sparkles, Box, Image, Megaphone, Ticket, Layout, Grid, Layers, Zap, Clock } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import { useData } from '@/store';
 
@@ -18,6 +18,8 @@ import OwnerCoupons from './modules/OwnerCoupons'; // Coupon Management
 import OwnerCategories from './modules/OwnerCategories'; // Category Management
 import OwnerHero from './modules/OwnerHero'; // Hero Slides Management
 import OwnerCuratedServices from './modules/OwnerCuratedServices'; // Curated Services Management
+import AdminFeatures from './modules/AdminFeatures'; // Features Management
+import AdminRescheduleRequests from './modules/AdminRescheduleRequests'; // Reschedule Requests Management
 
 interface DashboardCommonProps {
   user: { role: string };
@@ -46,6 +48,7 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
     { id: 'inventory', label: 'Inventory', icon: Box },
     { id: 'reports', label: 'Analytics & Reports', icon: FileText },
     { id: 'services', label: 'Service Menu', icon: Sparkles },
+    { id: 'reschedules', label: 'Reschedule Requests', icon: Clock },
     { 
       id: 'content', 
       label: 'Content Management', 
@@ -54,6 +57,7 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
         { id: 'categories', label: 'Service Categories', icon: Grid },
         { id: 'hero', label: 'Hero Carousel', icon: Layout },
         { id: 'curated', label: 'Curated Services', icon: Sparkles },
+        { id: 'features', label: 'Website Features', icon: Zap },
         { id: 'coupons', label: 'Discount Coupons', icon: Ticket },
         { id: 'banners', label: 'Promotional Banners', icon: Megaphone },
         { id: 'media', label: 'Media Library', icon: Image },
@@ -76,12 +80,16 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
         return <AdminReports />;
       case 'services':
          return <OwnerServices />;
+      case 'reschedules':
+        return <AdminRescheduleRequests />;
       case 'categories':
         return <OwnerCategories />;
       case 'hero':
         return <OwnerHero />;
       case 'curated':
         return <OwnerCuratedServices />;
+      case 'features':
+        return <AdminFeatures />;
       case 'coupons':
         return <OwnerCoupons />;
       case 'banners':

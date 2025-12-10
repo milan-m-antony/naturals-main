@@ -17,6 +17,8 @@ interface Service {
   includes?: string[];
   isMembersOnly?: boolean;
   offerValidUntil?: string;
+  rating?: number;
+  reviews_count?: number;
 }
 
 interface ServiceMenuProps {
@@ -35,7 +37,7 @@ const FILTER_GROUPS = [
   {
     id: 'category',
     label: 'Service Type',
-    options: ['Hair Services', 'Skin Care', 'Hands & Feet Care', 'Bridal & Grooming', 'Waxing', 'Threading', 'Nail Studio', 'Packages']
+    options: [] as string[]
   },
   {
     id: 'price',
@@ -68,6 +70,25 @@ const ServiceMenu: React.FC<ServiceMenuProps> = ({ services, onBook, title, limi
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState('Recommended');
   const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+
+  // Load categories from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('service_categories');
+    if (saved) {
+      try {
+        const categories = JSON.parse(saved);
+        const categoryNames = categories
+          .filter((c: any) => c.isActive !== false)
+          .map((c: any) => c.name);
+        setCategoryOptions(categoryNames);
+        // Update filter groups with dynamic categories
+        FILTER_GROUPS[0].options = categoryNames;
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (isFilterExpanded) {

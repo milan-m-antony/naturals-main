@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('service_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->integer('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->integer('service_count')->default(0); // Cache count of services in this category
             $table->timestamps();
+            
+            // Indexes for filtering and sorting
+            $table->index('is_active');
+            $table->index('sort_order');
         });
     }
 
@@ -29,3 +35,4 @@ return new class extends Migration
         Schema::dropIfExists('service_categories');
     }
 };
+

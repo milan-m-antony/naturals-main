@@ -10,9 +10,10 @@ interface UserBookingsProps {
   staff: any[];
   setSelectedBooking: (apt: Appointment) => void;
   showToast: (msg: string, type?: 'success' | 'loading') => void;
+  onNavigateToBooking?: (appointmentId?: number) => void;
 }
 
-const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, staff, setSelectedBooking, showToast }) => {
+const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, staff, setSelectedBooking, showToast, onNavigateToBooking }) => {
   const { submitReview } = useData();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming');
   
@@ -20,9 +21,14 @@ const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, sta
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState('All Time');
 
-  const [reviewModal, setReviewModal] = useState<{ isOpen: boolean, appointmentId: number | null }>({ isOpen: false, appointmentId: null });
+  const [reviewModal, setReviewModal] = useState<{ isOpen: boolean, appointmentId: number | null, serviceName?: string }>({ isOpen: false, appointmentId: null });
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
+
+  const [rescheduleModal, setRescheduleModal] = useState<{ isOpen: boolean, appointmentId: number | null }>({ isOpen: false, appointmentId: null });
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
+  const [rescheduleReason, setRescheduleReason] = useState('');
 
   const getStaffName = (id: number) => staff.find(s => s.id === id)?.name || 'Stylist';
   
@@ -55,13 +61,98 @@ const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, sta
       }, 1500);
   };
 
-  const handleReviewSubmit = () => {
-      if (reviewModal.appointmentId) {
-          submitReview(reviewModal.appointmentId, rating, reviewText);
-          setReviewModal({ isOpen: false, appointmentId: null });
-          setRating(0);
-          setReviewText('');
-          showToast('Thank you for your feedback!');
+  const handleReviewSubmit = async () => {
+      if (reviewModal.appointmentId && rating > 0) {
+          try {
+              // Call backend API to submit review
+              const token = localStorage.getItem('auth_token');
+              const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/appointments/${reviewModal.appointmentId}/review`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      ...(token && { 'Authorization': `Bearer ${token}` })
+                  },
+                  body: JSON.stringify({ rating, review: reviewText })
+              });
+
+              if (response.ok) {
+                  submitReview(reviewModal.appointmentId, rating, reviewText);
+                  
+                  // Also submit service review if service name available
+                  const apt = appointments.find(a => a.id === reviewModal.appointmentId);
+                  if (apt?.service) {
+                      try {
+                          const serviceId = services.find(s => s.name === apt.service)?.id;
+                          if (serviceId) {
+                              await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/services/${serviceId}/reviews`, {
+                                  method: 'POST',
+                                  headers: {
+                                      'Content-Type': 'application/json',
+                                      ...(token && { 'Authorization': `Bearer ${token}` })
+                                  },
+                                  body: JSON.stringify({ 
+                                      rating, 
+                                      review: reviewText,
+                                      appointment_id: reviewModal.appointmentId
+                                  })
+                              });
+                          }
+                      } catch (err) {
+                          console.error('Service review submission error:', err);
+                      }
+                  }
+                  
+                  setReviewModal({ isOpen: false, appointmentId: null });
+                  setRating(0);
+                  setReviewText('');
+                  showToast('Thank you for your feedback!');
+              } else {
+                  showToast('Failed to submit review. Please try again.');
+              }
+          } catch (error) {
+              console.error('Review submission error:', error);
+              showToast('Failed to submit review. Please try again.');
+          }
+      }
+  };
+
+  const handleRescheduleSubmit = async () => {
+      if (rescheduleModal.appointmentId && newDate && newTime) {
+          try {
+              const token = localStorage.getItem('auth_token');
+              const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/appointments/${rescheduleModal.appointmentId}/reschedule`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      ...(token && { 'Authorization': `Bearer ${token}` })
+                  },
+                  body: JSON.stringify({ 
+                      new_date: newDate, 
+                      new_time: newTime,
+                      reason: rescheduleReason
+                  })
+              });
+
+              if (response.ok) {
+                  setRescheduleModal({ isOpen: false, appointmentId: null });
+                  setNewDate('');
+                  setNewTime('');
+                  setRescheduleReason('');
+                  showToast('Reschedule request submitted successfully!');
+                  
+                  // Navigate to booking wizard after a short delay
+                  setTimeout(() => {
+                      if (onNavigateToBooking) {
+                          onNavigateToBooking(rescheduleModal.appointmentId || undefined);
+                      }
+                  }, 1500);
+              } else {
+                  showToast('Failed to submit reschedule request. Please try again.');
+              }
+          } catch (error) {
+              console.error('Reschedule error:', error);
+              showToast('Failed to submit reschedule request. Please try again.');
+          }
       }
   };
 
@@ -257,7 +348,10 @@ const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, sta
                                     <button onClick={() => setSelectedBooking(apt)} className="flex-1 md:flex-none bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-opacity">
                                         Manage
                                     </button>
-                                    <button className="flex-1 md:flex-none border border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-colors">
+                                    <button 
+                                        onClick={() => setRescheduleModal({ isOpen: true, appointmentId: apt.id })}
+                                        className="flex-1 md:flex-none border border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-colors"
+                                    >
                                         Reschedule
                                     </button>
                                 </>
@@ -280,8 +374,15 @@ const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, sta
                     </button>
                     
                     <div className="text-center mb-8">
-                        <h3 className="font-display text-3xl font-bold italic text-gray-900 dark:text-white mb-2">Rate Experience</h3>
-                        <p className="text-gray-500 text-sm">How was your service with us?</p>
+                        <h3 className="font-display text-3xl font-bold italic text-gray-900 dark:text-white mb-2">Rate Service</h3>
+                        {reviewModal.appointmentId && (
+                            <>
+                                <p className="text-sm font-bold text-yellow-600 dark:text-yellow-400 mb-2">
+                                    {appointments.find(a => a.id === reviewModal.appointmentId)?.service || 'Your Service'}
+                                </p>
+                                <p className="text-gray-500 text-xs">Rate this service to help others</p>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex justify-center gap-3 mb-8">
@@ -309,6 +410,65 @@ const UserBookings: React.FC<UserBookingsProps> = ({ appointments, services, sta
                         className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:scale-100 shadow-lg"
                     >
                         Submit Review
+                    </button>
+                </div>
+            </div>
+        )}
+
+        {/* Reschedule Modal */}
+        {rescheduleModal.isOpen && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
+                <div className="bg-white dark:bg-neutral-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative animate-in zoom-in-95">
+                    <button 
+                        onClick={() => setRescheduleModal({ isOpen: false, appointmentId: null })}
+                        className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="text-center mb-8">
+                        <h3 className="font-display text-3xl font-bold italic text-gray-900 dark:text-white mb-2">Reschedule Appointment</h3>
+                        <p className="text-gray-500 text-sm">Choose a new date and time for your appointment</p>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-300 mb-3">New Date</label>
+                            <input 
+                                type="date"
+                                value={newDate}
+                                onChange={(e) => setNewDate(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-neutral-800 rounded-2xl p-4 text-sm outline-none border border-transparent focus:border-yellow-400 text-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-300 mb-3">New Time</label>
+                            <input 
+                                type="time"
+                                value={newTime}
+                                onChange={(e) => setNewTime(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-neutral-800 rounded-2xl p-4 text-sm outline-none border border-transparent focus:border-yellow-400 text-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-300 mb-3">Reason (Optional)</label>
+                            <textarea 
+                                placeholder="Why would you like to reschedule?"
+                                value={rescheduleReason}
+                                onChange={(e) => setRescheduleReason(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-neutral-800 rounded-2xl p-4 text-sm outline-none border border-transparent focus:border-yellow-400 text-gray-900 dark:text-white resize-none min-h-[100px]"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={handleRescheduleSubmit}
+                        disabled={!newDate || !newTime}
+                        className="w-full mt-8 bg-black dark:bg-white text-white dark:text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:scale-100 shadow-lg"
+                    >
+                        Request Reschedule
                     </button>
                 </div>
             </div>

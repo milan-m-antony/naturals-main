@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, ArrowRight, Sparkles, X, Heart, Flame, Tag, AlertCircle } from 'lucide-react';
+import { Clock, ArrowRight, Sparkles, X, Heart, Flame, Tag, AlertCircle, Star } from 'lucide-react';
 
 interface Service {
   id: number;
@@ -15,6 +15,8 @@ interface Service {
   includes?: string[];
   isMembersOnly?: boolean;
   offerValidUntil?: string;
+  rating?: number;
+  reviews_count?: number;
 }
 
 interface ServiceCardProps {
@@ -103,6 +105,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewDetails, isFav
                <div className="flex flex-col">
                   {service.discount ? <span className="text-[10px] sm:text-xs md:text-xs text-gray-300 line-through font-medium">₹{service.price}</span> : null}
                   <span className="text-base sm:text-lg md:text-xl font-bold text-white">₹{Math.round(service.price - (service.price * (service.discount || 0) / 100))}</span>
+                  {service.rating && service.reviews_count ? (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-400 text-yellow-400" />
+                      <span className="text-[9px] md:text-xs font-bold text-yellow-400">{service.rating}</span>
+                      <span className="text-[8px] md:text-[9px] text-gray-300">({service.reviews_count})</span>
+                    </div>
+                  ) : null}
                </div>
                
                <div className="flex items-center gap-2 sm:gap-3">

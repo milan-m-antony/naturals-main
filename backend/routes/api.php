@@ -14,6 +14,7 @@ use App\Http\Controllers\PromotionalBannerController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\MediaLibraryController;
 use App\Http\Controllers\CuratedServiceController;
+use App\Http\Controllers\FeatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,12 +40,15 @@ Route::get('/staff/{id}', [StaffController::class, 'show']);
 
 // Public content routes (for homepage)
 Route::get('/service-categories', [ServiceCategoryController::class, 'index']);
+Route::get('/service-categories/{category}', [ServiceCategoryController::class, 'show']);
 Route::get('/hero-slides', [HeroSlideController::class, 'index']);
 Route::get('/promotional-banners', [PromotionalBannerController::class, 'index']);
 Route::get('/coupons', [CouponController::class, 'index']);
 Route::post('/coupons/validate', [CouponController::class, 'validate']);
 Route::get('/media', [MediaLibraryController::class, 'index']);
 Route::get('/curated-services', [CuratedServiceController::class, 'index']);
+Route::get('/features', [FeatureController::class, 'index']);
+Route::get('/reviews', [AppointmentController::class, 'getReviews']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
@@ -60,12 +64,23 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
     Route::patch('/appointments/{id}/status', [AppointmentController::class, 'updateStatus']);
+    Route::post('/appointments/{id}/review', [AppointmentController::class, 'submitReview']);
+    Route::post('/appointments/{id}/reschedule', [AppointmentController::class, 'requestReschedule']);
+    Route::get('/reschedule-requests', [AppointmentController::class, 'getRescheduleRequests']);
+    Route::get('/my-reviews', [AppointmentController::class, 'getUserReviews']);
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+
+    // Service reviews
+    Route::post('/services/{serviceId}/reviews', [AppointmentController::class, 'submitServiceReview']);
+    Route::get('/services/{serviceId}/reviews', [AppointmentController::class, 'getServiceReviews']);
 
     // Staff leave requests
     Route::get('/leave-requests', [StaffController::class, 'leaveRequests']);
     Route::post('/leave-requests', [StaffController::class, 'submitLeaveRequest']);
     Route::patch('/leave-requests/{id}', [StaffController::class, 'updateLeaveRequest']);
+
+    // Reschedule approvals (staff/admin)
+    Route::patch('/reschedule-requests/{id}', [AppointmentController::class, 'approveReschedule']);
 
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
@@ -92,6 +107,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/service-categories', [ServiceCategoryController::class, 'store']);
         Route::put('/service-categories/{category}', [ServiceCategoryController::class, 'update']);
         Route::delete('/service-categories/{category}', [ServiceCategoryController::class, 'destroy']);
+        Route::patch('/service-categories/bulk-status', [ServiceCategoryController::class, 'bulkUpdateStatus']);
+        Route::patch('/service-categories/reorder', [ServiceCategoryController::class, 'reorder']);
 
         // Hero Slides
         Route::post('/hero-slides', [HeroSlideController::class, 'store']);
@@ -118,5 +135,14 @@ Route::middleware('auth:api')->group(function () {
         // Curated Services
         Route::post('/curated-services', [CuratedServiceController::class, 'store']);
         Route::put('/curated-services/{curatedService}', [CuratedServiceController::class, 'update']);
+
+        // Features Management
+        Route::get('/features/admin', [FeatureController::class, 'index']);
+        Route::get('/features/{feature}', [FeatureController::class, 'show']);
+        Route::post('/features', [FeatureController::class, 'store']);
+        Route::put('/features/{feature}', [FeatureController::class, 'update']);
+        Route::delete('/features/{feature}', [FeatureController::class, 'destroy']);
+        Route::patch('/features/bulk-status', [FeatureController::class, 'bulkUpdateStatus']);
+        Route::patch('/features/reorder', [FeatureController::class, 'reorder']);
     });
 });
