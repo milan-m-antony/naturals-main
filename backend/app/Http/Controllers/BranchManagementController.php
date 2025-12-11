@@ -26,21 +26,23 @@ class BranchManagementController extends Controller
             $query->inState($request->get('state'));
         }
 
-        $branches = $query->with(['manager', 'staff'])
+        $branches = $query->with('manager')
             ->get()
             ->map(function ($branch) {
                 return [
                     'id' => $branch->id,
                     'name' => $branch->name,
-                    'address' => $branch->full_address,
+                    'address' => $branch->address,
+                    'city' => $branch->city,
+                    'state' => $branch->state,
                     'phone' => $branch->phone,
                     'email' => $branch->email,
-                    'manager' => $branch->manager?->only(['id', 'name', 'email']),
-                    'location' => $branch->location,
-                    'is_open_now' => $branch->isOpenNow(),
-                    'total_revenue' => $branch->total_revenue,
-                    'total_appointments' => $branch->total_appointments,
-                    'active_staff_count' => $branch->active_staff_count,
+                    'is_active' => $branch->is_active,
+                    'manager' => $branch->manager ? [
+                        'id' => $branch->manager->id,
+                        'name' => $branch->manager->name,
+                        'email' => $branch->manager->email,
+                    ] : null,
                 ];
             });
 
