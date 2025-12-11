@@ -17,6 +17,7 @@ use App\Http\Controllers\CuratedServiceController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\BusinessConfigController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,9 +53,10 @@ Route::get('/curated-services', [CuratedServiceController::class, 'index']);
 Route::get('/features', [FeatureController::class, 'index']);
 Route::get('/reviews', [AppointmentController::class, 'getReviews']);
 
-// Membership plans (public)
-Route::get('/membership-plans', [MembershipController::class, 'getPlans']);
-Route::get('/membership-plans/{id}', [MembershipController::class, 'getPlan']);
+// Public business config routes
+Route::get('/branches/{branchId}/business-hours', [BusinessConfigController::class, 'getBusinessHours']);
+Route::get('/branches/{branchId}/holidays', [BusinessConfigController::class, 'getHolidays']);
+Route::post('/branches/{branchId}/check-availability', [BusinessConfigController::class, 'checkAvailability']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
@@ -168,5 +170,10 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/membership-plans/{plan}', [MembershipController::class, 'updatePlan']);
         Route::delete('/membership-plans/{plan}', [MembershipController::class, 'destroyPlan']);
         Route::get('/memberships', [MembershipController::class, 'listMemberships']);
+
+        // Business Configuration (admin only)
+        Route::post('/branches/{branchId}/business-hours', [BusinessConfigController::class, 'setBusinessHours']);
+        Route::post('/branches/{branchId}/holidays', [BusinessConfigController::class, 'addHoliday']);
+        Route::delete('/branches/{branchId}/holidays/{holidayId}', [BusinessConfigController::class, 'deleteHoliday']);
     });
 });
