@@ -19,6 +19,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\BusinessConfigController;
 use App\Http\Controllers\CRMController;
+use App\Http\Controllers\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,6 +117,18 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/customers/{userId}/lifecycle', [CRMController::class, 'getCustomerLifecycle']);
     Route::get('/customers/search', [CRMController::class, 'searchCustomers']);
     Route::get('/customers/by-preference', [CRMController::class, 'getCustomersByPreference']);
+
+    // Analytics & Reports routes (admin/owner only)
+    Route::get('/analytics/revenue', [AnalyticsController::class, 'revenueAnalytics']);
+    Route::get('/analytics/staff-performance', [AnalyticsController::class, 'staffPerformance']);
+    Route::get('/analytics/services', [AnalyticsController::class, 'serviceAnalytics']);
+    Route::get('/analytics/customers', [AnalyticsController::class, 'customerInsights']);
+    Route::get('/analytics/appointments', [AnalyticsController::class, 'appointmentAnalytics']);
+    Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardOverview']);
+    Route::post('/reports', [AnalyticsController::class, 'generateReport']);
+    Route::get('/reports/{reportId}', [AnalyticsController::class, 'getReport']);
+    Route::get('/reports', [AnalyticsController::class, 'listReports']);
+    Route::delete('/reports/{reportId}', [AnalyticsController::class, 'deleteReport']);
 
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
