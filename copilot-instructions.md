@@ -36,14 +36,9 @@
 
 ## Git & Version Control Rules
 
-**CRITICAL:** Do NOT push to GitHub without explicit user approval.
+**CRITICAL:** Do NOT push to GitHub without explicit user approval,when user say push to github only push.
 
-### Workflow
-1. Make code changes
-2. Test locally
-3. Run: `git add .`
-4. Run: `git commit -m "Clear message"`
-5. **STOP** - Wait for user approval before pushing
+
 
 ## Recently Implemented Features (Session 7)
 
