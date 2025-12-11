@@ -20,6 +20,7 @@ use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\BusinessConfigController;
 use App\Http\Controllers\CRMController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\BranchManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,10 +37,12 @@ Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
 
 // Public branch routes
-Route::get('/branches', [BranchController::class, 'index']);
-Route::get('/branches/{id}', [BranchController::class, 'show']);
+Route::get('/branches', [BranchManagementController::class, 'index']);
+Route::get('/branches/{id}', [BranchManagementController::class, 'show']);
+Route::get('/branches/{branchId}/services', [BranchManagementController::class, 'getServices']);
+Route::get('/branches/{branchId}/staff', [BranchManagementController::class, 'getStaff']);
 
-// Public staff routes
+// Public business config routes
 Route::get('/staff', [StaffController::class, 'index']);
 Route::get('/staff/{id}', [StaffController::class, 'show']);
 
@@ -139,9 +142,15 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
         // Branch management
-        Route::post('/branches', [BranchController::class, 'store']);
-        Route::put('/branches/{id}', [BranchController::class, 'update']);
-        Route::delete('/branches/{id}', [BranchController::class, 'destroy']);
+        Route::post('/branches', [BranchManagementController::class, 'store']);
+        Route::put('/branches/{id}', [BranchManagementController::class, 'update']);
+        Route::post('/branches/{branchId}/services', [BranchManagementController::class, 'assignService']);
+        Route::delete('/branches/{branchId}/services/{serviceId}', [BranchManagementController::class, 'removeService']);
+        Route::post('/branches/{branchId}/staff', [BranchManagementController::class, 'assignStaff']);
+        Route::delete('/branches/{branchId}/staff/{staffId}', [BranchManagementController::class, 'removeStaff']);
+        Route::get('/branches/{branchId}/inventory', [BranchManagementController::class, 'getInventory']);
+        Route::get('/branches/{branchId}/appointments', [BranchManagementController::class, 'getAppointments']);
+        Route::get('/branches/{branchId}/statistics', [BranchManagementController::class, 'getStatistics']);
 
         // Inventory management
         Route::get('/inventory', [InventoryController::class, 'index']);
