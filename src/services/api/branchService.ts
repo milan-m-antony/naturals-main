@@ -2,7 +2,20 @@ import apiClient from './client';
 
 export const branchService = {
   /**
-   * Get all active branches
+   * Get all branches (simple method for DataContext)
+   */
+  async getAll() {
+    try {
+      const response = await apiClient.get('/branches');
+      return response.data.branches || response.data;
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all active branches with filters
    */
   async getAllBranches(city?: string, state?: string) {
     try {
