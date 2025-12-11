@@ -12,8 +12,11 @@ export interface Staff {
   id: number;
   name: string;
   role: string;
+  email?: string;
+  phone?: string;
   specialty?: string;
   branchId: number;
+  branchName?: string;
   rating?: number;
   avatar?: string;
   available?: boolean;
@@ -22,10 +25,11 @@ export interface Staff {
 export interface LeaveRequest {
   id: number;
   staffId: number;
+  staffName?: string;
   startDate: string;
   endDate: string;
   reason: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'Pending' | 'Approved' | 'Rejected';
 }
 
 export type ViewType = 'home' | 'services' | 'discounts' | 'contact' | 'about' | 'membership' | 'booking' | 'admin-login';

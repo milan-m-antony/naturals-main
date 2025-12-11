@@ -90,7 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       `}>
         {/* Brand Header - Fixed */}
         <div className="h-20 flex items-center justify-between px-8 border-b border-gray-100 dark:border-neutral-800 shrink-0">
-           <img src="https://i.postimg.cc/9MQr6G9k/naturals-logo.jpg" alt="Naturals" className="h-9 w-9 rounded-full object-cover" />
+           <img src="/naturals-logo.svg" alt="Naturals" className="h-9 w-9 rounded-full object-cover" />
            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-1 text-gray-500 hover:text-black dark:hover:text-white"><X className="w-5 h-5" /></button>
         </div>
 
@@ -231,7 +231,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                    className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                  >
                     <div className="text-right hidden md:block">
-                        <p className="text-xs font-bold text-gray-900 dark:text-white capitalize">{user?.role || 'Admin'}</p>
+                        <p className="text-xs font-bold text-gray-900 dark:text-white capitalize">{user?.role === 'admin' ? 'Manager' : (user?.role || 'User')}</p>
                         <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logged In</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-800 overflow-hidden border-2 border-white dark:border-neutral-700 shadow-sm">

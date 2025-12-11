@@ -9,11 +9,11 @@ export const useAuth = () => {
   const [isAdminView, setIsAdminView] = useState(false);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
 
-  // Check authentication on mount
+  // Check authentication on mount - only set user auth for customers, not admin/staff
   useEffect(() => {
     const token = authService.getToken();
     const user = authService.getCurrentUser();
-    if (token && user) {
+    if (token && user && user.role === 'customer') {
       setIsUserAuthenticated(true);
       setUserProfile(user);
     }
@@ -21,8 +21,10 @@ export const useAuth = () => {
 
   const handleLoginSuccess = useCallback(() => {
     const user = authService.getCurrentUser();
-    setIsUserAuthenticated(true);
-    setUserProfile(user);
+    if (user && user.role === 'customer') {
+      setIsUserAuthenticated(true);
+      setUserProfile(user);
+    }
     setIsAuthModalOpen(false);
   }, []);
 
@@ -43,7 +45,12 @@ export const useAuth = () => {
     }
   }, []);
 
-  const handleAdminLogout = useCallback(() => {
+  const handleAdminLogout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Admin logout error:', err);
+    }
     setAdminUser(null);
     setIsAdminView(false);
   }, []);

@@ -1,101 +1,168 @@
-# NATURALS Beauty Salon - Kanjirappally
+# NATURALS Salon - Kanjirappally
 
-Complete beauty salon management system with customer booking and admin dashboards.
+Modern beauty salon booking & management system.
 
-## Tech Stack
-- **Frontend:** React 18 + TypeScript + Tailwind CSS + Vite
-- **Backend:** Laravel PHP + MySQL
-- **Auth:** JWT tokens
+---
 
-## Features
+## 🚀 Quick Start
 
-### Customer Portal
-- 🗓️ Multi-step booking wizard
-- ⭐ Service reviews & ratings (1-5 stars)
-- 📅 Appointment reschedule requests
-- 👤 User dashboard with bookings & reviews
-- 🎨 Dark mode support
-- 📱 Fully responsive
-
-### Admin Dashboards
-
-**Owner Dashboard:**
-- Business analytics & reports
-- Service management (CRUD)
-- Staff management
-- Reschedule request approvals
-- Full system access
-
-**Manager/Receptionist:**
-- Appointment calendar
-- POS billing system
-- Staff scheduling
-- Walk-in bookings
-
-**Staff/Stylist:**
-- Personal schedule view
-- Appointment management
-- Task completion tracking
-
-## Quick Start
-
-### Frontend Setup
-```bash
-npm install
-npm run dev
-```
-Access at: `http://localhost:5173`
-
-### Backend Setup
+### Backend
 ```bash
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed
 php artisan serve
 ```
-Access at: `http://localhost:8000`
 
-## Recent Features (Session 7)
-- ⭐ Per-service rating system with auto-calculated averages
-- 📝 "My Reviews" dashboard tab for customers
-- 🔄 Appointment reschedule system with admin approval
-- 📊 Admin reschedule management interface
-- 🗄️ New database tables: `service_reviews`, `appointment_reschedules`
-- 🔌 6 new API endpoints for reviews & reschedules
+### Frontend
+```bash
+npm install
+npm run dev
+```
 
-## Documentation
-- `QUICK_START.md` - Detailed setup guide
-- `API_REFERENCE.md` - API endpoints reference
-- `BACKEND_FRONTEND_INTEGRATION.md` - Integration guide
-- `copilot-instructions.md` - Development guidelines
-- `feature.md` - Feature specifications
+**URLs:** Frontend: `http://localhost:3000` | Backend: `http://localhost:8000`
 
-## Theme
-- **Colors:** Yellow (#facc15), White, Black
-- **No gradients** (locked design)
-- **Dark mode:** Full support with `dark:` prefixes
-- **Borders:** 2px rounded
+---
 
-## Project Structure
+## ✨ Features
+
+### Customer
+- 🗓️ Online booking (4-step wizard with animations)
+- 💳 Payment (Razorpay: Card/UPI/Venue)
+- 🔐 User accounts
+- 🌙 Dark mode
+- 📱 Responsive
+
+### Admin (Manager)
+- 📊 Dashboard
+- 📅 Appointments
+- 👥 Staff & leaves
+- 📦 Inventory
+- 💰 POS
+- 💵 Payroll
+- 📈 Reports
+- 🎟️ Coupons & Banners
+
+### Owner (All manager features +)
+- **Content Management:**
+  - Service Categories
+  - Hero Carousel
+  - Curated Services
+  - Website Features
+  - Discount Coupons
+  - Promotional Banners
+  - Media Library (separate storage per section)
+- ⚙️ Shop settings
+- 🎯 Service menu
+- 🔄 Reschedule requests
+
+---
+
+## 🔑 Login
+
+```
+Owner:    owner@naturals.com    / owner123
+Manager:  manager@naturals.com  / manager123
+Staff:    staff@naturals.com    / staff123
+```
+
+---
+
+## 💳 Payment
+
+**Status:** Bypass mode (testing without credentials)
+
+**Enable:**
+1. Get keys from [razorpay.com](https://razorpay.com)
+2. Add to `backend/.env`:
+   ```env
+   RAZORPAY_KEY_ID=rzp_test_xxxxx
+   RAZORPAY_KEY_SECRET=xxxxxxxxxxxxx
+   ```
+3. Set `bypassMode = false` in `src/services/razorpayService.ts`
+
+📖 **Details:** `PAYMENT_BYPASS_MODE.md`
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:** React 18 + TypeScript + Vite + TailwindCSS  
+**Backend:** Laravel 10 + PostgreSQL + JWT  
+**Payment:** Razorpay PHP SDK
+
+---
+
+## 📁 Structure
+
 ```
 src/
 ├── components/
-│   ├── admin/          # Admin dashboards
-│   ├── booking/        # Booking wizard
-│   ├── user/           # Customer dashboard
-│   └── service/        # Service cards & menus
-├── services/api/       # API service layer
-└── context/            # Global state
+│   ├── booking/       # Booking wizard
+│   └── admin/
+│       └── modules/   # Admin features
+├── services/          # API services
+└── styles/            # Animations
 
 backend/
-├── app/
-│   ├── Models/         # Eloquent models
-│   └── Http/Controllers/
+├── app/Http/Controllers/
 ├── database/migrations/
-└── routes/api.php
+└── routes/
 ```
 
-## License
-Proprietary - NATURALS Salon Kanjirappally
+---
+
+## 📖 Docs
+
+- `STATUS.md` - Project status
+- `PAYMENT_BYPASS_MODE.md` - Payment setup
+- `UI_ENHANCEMENTS.md` - UI features
+- `RAZORPAY_SETUP.md` - Payment guide
+
+---
+
+## 🎨 Highlights
+
+### Booking Flow
+1. Select Services
+2. Choose Date & Time
+3. Payment & Confirmation (animated)
+4. Success (confetti effect)
+
+### Payment Options
+- Card (Razorpay)
+- UPI/Wallets
+- Pay at Venue
+
+### Content Management
+**Separate media per section:**
+- Upload/delete images & videos
+- Section-specific galleries
+- Preview modal
+
+---
+
+## 🐛 Troubleshooting
+
+**Backend:**
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+**Payment:** Check `bypassMode` in `razorpayService.ts`
+
+**Database:**
+```bash
+php artisan migrate:fresh --seed
+```
+
+**Logs:**  
+Frontend: Browser console  
+Backend: `backend/storage/logs/laravel.log`
+
+---
+
+**Built for NATURALS Salon, Kanjirappally**

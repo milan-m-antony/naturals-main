@@ -119,10 +119,10 @@ const UserReviews: React.FC<UserReviewsProps> = ({ showToast }) => {
       ) : filteredReviews.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-neutral-900 rounded-[2.5rem] border border-dashed border-gray-200 dark:border-neutral-800">
           <MessageSquare className="w-12 h-12 text-gray-300 dark:text-neutral-700 mx-auto mb-4" />
-          <h3 className="font-bold text-gray-900 dark:text-white mb-1">No reviews yet</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {searchQuery ? 'No reviews match your search' : 'Start reviewing services from your completed bookings!'}
-          </p>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">No reviews yet</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {searchQuery ? 'No reviews match your search' : 'Complete a booking and drop your first review to see it here.'}
+            </p>
         </div>
       ) : (
         <div className="space-y-4">

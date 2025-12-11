@@ -17,8 +17,6 @@ import WhyChooseNaturals from '@/components/home/WhyChooseNaturals';
 import CuratedServices from '@/components/home/CuratedServices';
 import ComboOffers from '@/components/home/ComboOffers';
 import OffersPoster from '@/components/home/OffersPoster';
-import TrustAndProof from '@/components/home/TrustAndProof';
-import CustomerReviews from '@/components/home/CustomerReviews';
 
 // Service Components
 import ServiceMenu from '@/components/service/ServiceMenu';
@@ -207,8 +205,6 @@ export const AppContent: React.FC = () => {
               onBook={handleBookServiceEnhanced}
               onNavigate={handleNavigateWithBooking}
             />
-            <TrustAndProof />
-            <CustomerReviews />
           </>
         )}
 

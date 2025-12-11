@@ -20,7 +20,6 @@ use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\BusinessConfigController;
 use App\Http\Controllers\CRMController;
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\BranchManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,14 +34,15 @@ Route::post('/login', [AuthController::class, 'login']);
 // Public service routes
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
+Route::post('/services', [ServiceController::class, 'store']);
+Route::put('/services/{id}', [ServiceController::class, 'update']);
+Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
 // Public branch routes
-Route::get('/branches', [BranchManagementController::class, 'index']);
-Route::get('/branches/{id}', [BranchManagementController::class, 'show']);
-Route::get('/branches/{branchId}/services', [BranchManagementController::class, 'getServices']);
-Route::get('/branches/{branchId}/staff', [BranchManagementController::class, 'getStaff']);
+Route::get('/branches', [BranchController::class, 'index']);
+Route::get('/branches/{id}', [BranchController::class, 'show']);
 
-// Public business config routes
+// Public staff routes
 Route::get('/staff', [StaffController::class, 'index']);
 Route::get('/staff/{id}', [StaffController::class, 'show']);
 
@@ -52,7 +52,7 @@ Route::get('/service-categories/{category}', [ServiceCategoryController::class, 
 Route::get('/hero-slides', [HeroSlideController::class, 'index']);
 Route::get('/promotional-banners', [PromotionalBannerController::class, 'index']);
 Route::get('/coupons', [CouponController::class, 'index']);
-Route::post('/coupons/validate', [CouponController::class, 'validate']);
+Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
 Route::get('/media', [MediaLibraryController::class, 'index']);
 Route::get('/curated-services', [CuratedServiceController::class, 'index']);
 Route::get('/features', [FeatureController::class, 'index']);
@@ -70,6 +70,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/me/password', [AuthController::class, 'updatePassword']);
 
     // Appointment routes (all authenticated users)
     Route::get('/appointments', [AppointmentController::class, 'index']);
@@ -79,6 +81,7 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('/appointments/{id}/status', [AppointmentController::class, 'updateStatus']);
     Route::post('/appointments/{id}/review', [AppointmentController::class, 'submitReview']);
     Route::post('/appointments/{id}/reschedule', [AppointmentController::class, 'requestReschedule']);
+
     Route::get('/reschedule-requests', [AppointmentController::class, 'getRescheduleRequests']);
     Route::get('/my-reviews', [AppointmentController::class, 'getUserReviews']);
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
@@ -91,6 +94,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/leave-requests', [StaffController::class, 'leaveRequests']);
     Route::post('/leave-requests', [StaffController::class, 'submitLeaveRequest']);
     Route::patch('/leave-requests/{id}', [StaffController::class, 'updateLeaveRequest']);
+
+    // Staff profile image
+    Route::post('/staff/{id}/avatar', [StaffController::class, 'uploadAvatar']);
 
     // Reschedule approvals (staff/admin)
     Route::patch('/reschedule-requests/{id}', [AppointmentController::class, 'approveReschedule']);
@@ -136,21 +142,16 @@ Route::middleware('auth:api')->group(function () {
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
         
-        // Service management
-        Route::post('/services', [ServiceController::class, 'store']);
-        Route::put('/services/{id}', [ServiceController::class, 'update']);
-        Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-
+        // Staff management
+        Route::post('/staff', [StaffController::class, 'store']);
+        Route::put('/staff/{id}', [StaffController::class, 'update']);
+        Route::delete('/staff/{id}', [StaffController::class, 'destroy']);
+        Route::patch('/staff/{id}/toggle-availability', [StaffController::class, 'toggleAvailability']);
+        
         // Branch management
-        Route::post('/branches', [BranchManagementController::class, 'store']);
-        Route::put('/branches/{id}', [BranchManagementController::class, 'update']);
-        Route::post('/branches/{branchId}/services', [BranchManagementController::class, 'assignService']);
-        Route::delete('/branches/{branchId}/services/{serviceId}', [BranchManagementController::class, 'removeService']);
-        Route::post('/branches/{branchId}/staff', [BranchManagementController::class, 'assignStaff']);
-        Route::delete('/branches/{branchId}/staff/{staffId}', [BranchManagementController::class, 'removeStaff']);
-        Route::get('/branches/{branchId}/inventory', [BranchManagementController::class, 'getInventory']);
-        Route::get('/branches/{branchId}/appointments', [BranchManagementController::class, 'getAppointments']);
-        Route::get('/branches/{branchId}/statistics', [BranchManagementController::class, 'getStatistics']);
+        Route::post('/branches', [BranchController::class, 'store']);
+        Route::put('/branches/{id}', [BranchController::class, 'update']);
+        Route::delete('/branches/{id}', [BranchController::class, 'destroy']);
 
         // Inventory management
         Route::get('/inventory', [InventoryController::class, 'index']);

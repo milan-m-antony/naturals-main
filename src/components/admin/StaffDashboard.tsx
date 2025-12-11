@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Calendar, Settings, DollarSign, Clock, Bell, CheckCircle, AlertCircle, Phone, Mail, Upload, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Calendar, Settings, DollarSign, Clock, Bell, CheckCircle, AlertCircle, Phone, Mail, Upload, HelpCircle, User, Lock, Save } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import { useData } from '@/store';
+import { authService } from '@/services/api';
 
 interface StaffMember {
   id: number; name: string; role: string; image: string;
@@ -13,14 +14,28 @@ interface DashboardCommonProps {
 
 interface StaffDashboardProps extends DashboardCommonProps {
   staffMember: StaffMember;
+  variant?: 'staff' | 'receptionist';
 }
 
 const StaffDashboard: React.FC<StaffDashboardProps> = (props) => {
-  const { staffMember } = props;
-  const { getAppointmentsByStaff, updateAppointmentStatus } = useData();
+  const { staffMember, variant = 'staff' } = props;
+  const { getAppointmentsByStaff, updateAppointmentStatus, refreshStaff } = useData();
+  
+  // Safety check
+  if (!staffMember) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
   
   // Fetch appointments for this staff member from context
   const staffAppointments = getAppointmentsByStaff(staffMember.id);
+
+  React.useEffect(() => {
+    setProfileForm({
+      name: staffMember?.name || '',
+      email: staffMember?.email || '',
+      phone: staffMember?.phone || '',
+    });
+  }, [staffMember]);
 
   const [activeModule, setActiveModule] = useState('home');
   const [appointmentFilter, setAppointmentFilter] = useState<'today' | 'upcoming' | 'past'>('today');
@@ -32,14 +47,39 @@ const StaffDashboard: React.FC<StaffDashboardProps> = (props) => {
   ]);
   const [leaveForm, setLeaveForm] = useState({ start: '', end: '', reason: '' });
 
-  const sidebarNavItems = [
-    { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'appointments', label: 'My Appointments', icon: Calendar },
-    { id: 'leaves', label: 'My Leaves', icon: Clock },
-    { id: 'payroll', label: 'My Payroll', icon: DollarSign },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
+  const [profileForm, setProfileForm] = useState({
+    name: staffMember?.name || '',
+    email: staffMember?.email || '',
+    phone: staffMember?.phone || '',
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    current: '',
+    next: '',
+    confirm: '',
+  });
+  const [profileStatus, setProfileStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const sidebarNavItems = variant === 'receptionist'
+    ? [
+        { id: 'home', label: 'Front Desk', icon: LayoutDashboard },
+        { id: 'appointments', label: 'Bookings', icon: Calendar },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'security', label: 'Password', icon: Lock },
+      ]
+    : [
+        { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'appointments', label: 'My Appointments', icon: Calendar },
+        { id: 'leaves', label: 'My Leaves', icon: Clock },
+        { id: 'payroll', label: 'My Payroll', icon: DollarSign },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'security', label: 'Password', icon: Lock },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
 
   // Handlers
   const handleMarkCompleted = (id: number) => {
@@ -62,6 +102,46 @@ const StaffDashboard: React.FC<StaffDashboardProps> = (props) => {
     
     setLeaves([newLeave, ...leaves]);
     setLeaveForm({ start: '', end: '', reason: '' });
+  };
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileStatus(null);
+    setSavingProfile(true);
+    try {
+      await authService.updateProfile({
+        name: profileForm.name,
+        email: profileForm.email,
+        phone: profileForm.phone,
+      });
+      await refreshStaff();
+      setProfileStatus({ type: 'success', msg: 'Profile updated successfully' });
+    } catch (err: any) {
+      const message = err?.response?.data?.message || (err?.response?.data?.errors ? JSON.stringify(err.response.data.errors) : err?.message || 'Failed to update profile');
+      setProfileStatus({ type: 'error', msg: message });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handlePasswordSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatus(null);
+    setSavingPassword(true);
+    try {
+      await authService.updatePassword({
+        current_password: passwordForm.current,
+        new_password: passwordForm.next,
+        new_password_confirmation: passwordForm.confirm,
+      });
+      setPasswordStatus({ type: 'success', msg: 'Password updated successfully' });
+      setPasswordForm({ current: '', next: '', confirm: '' });
+    } catch (err: any) {
+      const message = err?.response?.data?.message || (err?.response?.data?.errors ? JSON.stringify(err.response.data.errors) : err?.message || 'Failed to update password');
+      setPasswordStatus({ type: 'error', msg: message });
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   // Filter Logic
@@ -334,6 +414,138 @@ const StaffDashboard: React.FC<StaffDashboardProps> = (props) => {
           </div>
         );
 
+      case 'profile':
+        return (
+          <div className="max-w-3xl mx-auto bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.08em] text-gray-500 font-semibold">Profile</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Update your details</h3>
+              </div>
+              <div className="text-right text-xs text-gray-500">{variant === 'receptionist' ? 'Reception team' : 'Service staff'}</div>
+            </div>
+            {profileStatus && (
+              <div className={`p-3 rounded-xl text-sm flex items-center gap-2 ${profileStatus.type === 'success' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}`}>
+                {profileStatus.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {profileStatus.msg}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handleProfileSave}>
+              <div className="grid md:grid-cols-2 gap-4">
+                <label className="space-y-1 text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 font-semibold">Full Name</span>
+                  <input
+                    value={profileForm.name}
+                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                    className="w-full bg-gray-50 dark:bg-neutral-700 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                    placeholder="Your name"
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 font-semibold">Email</span>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="email"
+                      value={profileForm.email}
+                      onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                      className="w-full bg-gray-50 dark:bg-neutral-700 pl-9 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                      placeholder="email@naturals.in"
+                      required
+                    />
+                  </div>
+                </label>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <label className="space-y-1 text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 font-semibold">Phone</span>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                      className="w-full bg-gray-50 dark:bg-neutral-700 pl-9 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                      placeholder="Phone number"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500">First 6 digits set the default password for new staff.</p>
+                </label>
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" /> {savingProfile ? 'Saving...' : 'Save profile'}
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+
+      case 'security':
+        return (
+          <div className="max-w-2xl mx-auto bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-full bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-gray-200"><Lock className="w-5 h-5" /></div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.08em] text-gray-500 font-semibold">Security</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Update password</h3>
+              </div>
+            </div>
+            {passwordStatus && (
+              <div className={`p-3 rounded-xl text-sm flex items-center gap-2 ${passwordStatus.type === 'success' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}`}>
+                {passwordStatus.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {passwordStatus.msg}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handlePasswordSave}>
+              <label className="space-y-1 text-sm w-full">
+                <span className="text-gray-600 dark:text-gray-300 font-semibold">Current password</span>
+                <input
+                  type="password"
+                  required
+                  value={passwordForm.current}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                  className="w-full bg-gray-50 dark:bg-neutral-700 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                />
+              </label>
+              <div className="grid md:grid-cols-2 gap-4">
+                <label className="space-y-1 text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 font-semibold">New password</span>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.next}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, next: e.target.value })}
+                    className="w-full bg-gray-50 dark:bg-neutral-700 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 font-semibold">Confirm new password</span>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.confirm}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                    className="w-full bg-gray-50 dark:bg-neutral-700 p-3 rounded-lg border border-transparent focus:border-black dark:focus:border-white outline-none text-gray-900 dark:text-white"
+                  />
+                </label>
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" /> {savingPassword ? 'Updating...' : 'Update password'}
+                </button>
+              </div>
+            </form>
+            <p className="text-[11px] text-gray-500">Use a strong password that is not shared. Receptionist and staff accounts are scoped to their roles.</p>
+          </div>
+        );
+
       case 'payroll':
         return (
           <div className="space-y-6">
@@ -352,7 +564,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = (props) => {
       sidebarNavItems={sidebarNavItems}
       activeModule={activeModule}
       setActiveModule={setActiveModule}
-      pageTitle="Staff / Reception Portal"
+      pageTitle={variant === 'receptionist' ? 'Receptionist Portal' : 'Staff / Service Portal'}
     >
       {renderContent()}
     </DashboardLayout>

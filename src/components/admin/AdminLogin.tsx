@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { ArrowRight, Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { authService } from '@/services/api';
 
 interface AdminUser {
-  role: 'owner' | 'admin' | 'staff';
+  role: 'owner' | 'manager' | 'staff';
+  id?: number;
+  name?: string;
+  email?: string;
 }
 
 interface AdminLoginProps {
   onLogin: (result: { success: boolean; user?: AdminUser }) => void;
 }
-
-const ROLES = {
-  'owner@naturals.com': { role: 'owner', password: 'password' },
-  'admin@naturals.com': { role: 'admin', password: 'password' },
-  'staff@naturals.com': { role: 'staff', password: 'password' },
-} as const;
-
-type ValidEmail = keyof typeof ROLES;
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -24,20 +20,36 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const userCredentials = ROLES[email as ValidEmail];
-      if (userCredentials && password === userCredentials.password) {
-        onLogin({ success: true, user: { role: userCredentials.role } });
-      } else {
-        setError('Invalid credentials.');
+    try {
+      const response = await authService.login({ email, password });
+      
+      // Check if user has owner/manager/staff role (backend uses 'admin', we map to 'manager')
+      const userRole = (response.user.role === 'admin' ? 'manager' : response.user.role) as 'owner' | 'manager' | 'staff';
+      if (!['owner', 'manager', 'staff'].includes(userRole)) {
+        setError('You do not have permission to access this portal. Only Owner, Manager, and Staff can login.');
         setIsLoading(false);
+        return;
       }
-    }, 1000);
+      
+      onLogin({
+        success: true,
+        user: {
+          role: userRole,
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+        },
+      });
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Invalid credentials.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,7 +65,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black"></div>
           <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
           <div className="relative z-10 text-center">
-            <img src="https://i.postimg.cc/9MQr6G9k/naturals-logo.jpg" alt="Naturals" className="h-16 w-16 rounded-full object-cover mx-auto" />
+            <img src="/naturals-logo.svg" alt="Naturals" className="h-16 w-16 rounded-full object-cover mx-auto" />
             <div className="mt-2 inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Admin Portal</p>
             </div>
@@ -119,13 +131,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
           <div className="mt-8 text-left bg-gray-50 py-3 px-4 rounded-2xl border border-gray-100">
             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold text-center mb-2">
-              Demo Access (password: `password`)
+              Demo Access
             </p>
-            <div className="space-y-1">
-              <p className="text-xs text-gray-600 font-mono"><strong>Owner:</strong> owner@naturals.com</p>
-              <p className="text-xs text-gray-600 font-mono"><strong>Manager:</strong> admin@naturals.com</p>
-              <p className="text-xs text-gray-600 font-mono"><strong>Staff:</strong> staff@naturals.com</p>
+            <div className="space-y-1 mb-2">
+              <p className="text-xs text-gray-600 font-mono"><strong>Owner:</strong> owner@naturals.in / password</p>
+              <p className="text-xs text-gray-600 font-mono"><strong>Manager:</strong> admin@naturals.in / password</p>
+              <p className="text-xs text-gray-600 font-mono"><strong>Receptionist:</strong> receptionist@naturals.in / password</p>
+              <p className="text-xs text-gray-600 font-mono"><strong>Staff:</strong> priya@naturals.in / password</p>
             </div>
+            <p className="text-[10px] text-gray-500 leading-relaxed">
+              <strong>Note:</strong> New staff created by admin use first 6 digits of phone as password.
+            </p>
           </div>
         </div>
       </div>

@@ -54,7 +54,7 @@ class CouponController extends Controller
     /**
      * Validate a coupon code
      */
-    public function validate(Request $request)
+    public function validateCoupon(Request $request)
     {
         $request->validate([
             'code' => 'required|string',

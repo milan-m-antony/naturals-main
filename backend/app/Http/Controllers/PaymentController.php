@@ -14,15 +14,36 @@ class PaymentController extends Controller
 
     public function __construct()
     {
-        $this->api = new Api(
-            config('razorpay.key_id'),
-            config('razorpay.key_secret')
-        );
+        // Lazy init to avoid breaking route:list when package/env not present
+        if (class_exists(Api::class) && config('razorpay.key_id') && config('razorpay.key_secret')) {
+            $this->api = new Api(
+                config('razorpay.key_id'),
+                config('razorpay.key_secret')
+            );
+        }
+    }
+
+    /**
+     * Ensure Razorpay SDK is available and configured
+     */
+    protected function ensureApiConfigured()
+    {
+        if ($this->api) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => 'Payment gateway not configured. Install razorpay/razorpay and set RAZORPAY_KEY_ID/RAZORPAY_KEY_SECRET.',
+        ], 500);
     }
 
     // Create order
     public function createOrder(Request $request)
     {
+        if ($response = $this->ensureApiConfigured()) {
+            return $response;
+        }
+
         $validator = Validator::make($request->all(), [
             'appointment_id' => 'required|exists:appointments,id',
             'amount' => 'required|numeric|min:1',
@@ -78,6 +99,10 @@ class PaymentController extends Controller
     // Verify payment
     public function verify(Request $request)
     {
+        if ($response = $this->ensureApiConfigured()) {
+            return $response;
+        }
+
         $validator = Validator::make($request->all(), [
             'razorpay_order_id' => 'required',
             'razorpay_payment_id' => 'required',
@@ -148,6 +173,10 @@ class PaymentController extends Controller
     // Refund payment
     public function refund(Request $request, $paymentId)
     {
+        if ($response = $this->ensureApiConfigured()) {
+            return $response;
+        }
+
         $validator = Validator::make($request->all(), [
             'amount' => 'nullable|numeric|min:1',
             'reason' => 'nullable|string',

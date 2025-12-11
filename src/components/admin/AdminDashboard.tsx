@@ -24,24 +24,46 @@ interface DashboardCommonProps {
 }
 
 const AdminDashboard: React.FC<DashboardCommonProps> = (props) => {
-  const { appointments, staff, getAppointmentsByBranch, updateAppointmentStatus, refreshAppointments, refreshInventory } = useData();
+  const {
+    appointments,
+    staff,
+    leaveRequests,
+    branches,
+    getAppointmentsByBranch,
+    updateAppointmentStatus,
+    refreshAppointments,
+    refreshInventory,
+    refreshStaff,
+    refreshLeaveRequests,
+    uploadStaffAvatar,
+    updateLeaveRequestStatus,
+    addStaff,
+    updateStaff,
+  } = useData();
   const [activeModule, setActiveModule] = useState('overview');
 
   // Load latest data for admin modules
   useEffect(() => {
     refreshAppointments().catch(() => {});
     refreshInventory().catch(() => {});
-  }, [refreshAppointments, refreshInventory]);
+    refreshStaff().catch(() => {});
+    refreshLeaveRequests().catch(() => {});
+  }, [refreshAppointments, refreshInventory, refreshLeaveRequests, refreshStaff]);
 
   // Let's assume branch 1 is the admin's branch
   const branchAppointments = getAppointmentsByBranch(1);
   
   // Staff and leave data will be managed here for child components
   const [staffList, setStaffList] = useState(staff);
-  const [leaveRequests, setLeaveRequests] = useState([
-    { id: 1, name: 'Priya Sharma', dates: 'Jan 10 - Jan 12', reason: 'Family Event', status: 'Pending' },
-    { id: 2, name: 'Robert Fox', dates: 'Feb 05', reason: 'Sick Leave', status: 'Approved' }
-  ]);
+  const [dashboardLeaves, setDashboardLeaves] = useState(leaveRequests);
+
+  useEffect(() => {
+    setStaffList(staff);
+  }, [staff]);
+
+  useEffect(() => {
+    setDashboardLeaves(leaveRequests);
+  }, [leaveRequests]);
   
   const getStaffName = (id: number) => {
       const staffMember = staff.find(s => s.id === id);
@@ -64,11 +86,30 @@ const AdminDashboard: React.FC<DashboardCommonProps> = (props) => {
   const renderContent = () => {
     switch (activeModule) {
       case 'overview':
-        return <AdminOverview appointments={branchAppointments} staffCount={staffList.length} pendingLeavesCount={leaveRequests.filter(r => r.status === 'Pending').length} />;
+        return (
+          <AdminOverview
+            appointments={branchAppointments}
+            staffCount={staffList.length}
+            pendingLeavesCount={dashboardLeaves.filter((r) => r.status.toLowerCase() === 'pending').length}
+          />
+        );
       case 'appointments':
         return <AdminAppointments appointments={branchAppointments} staffList={staffList} updateAppointmentStatus={updateAppointmentStatus} getStaffName={getStaffName} />;
       case 'staff':
-        return <AdminStaff staffList={staffList} setStaffList={setStaffList} leaveRequests={leaveRequests} setLeaveRequests={setLeaveRequests} />;
+        return (
+          <AdminStaff
+            staffList={staffList}
+            setStaffList={setStaffList}
+            leaveRequests={dashboardLeaves}
+            setLeaveRequests={setDashboardLeaves}
+            onUpdateLeaveStatus={updateLeaveRequestStatus}
+            onRefreshLeaves={refreshLeaveRequests}
+            onUploadAvatar={uploadStaffAvatar}
+            onAddStaff={addStaff}
+            onUpdateStaff={updateStaff}
+            branches={branches}
+          />
+        );
       case 'inventory':
         return <AdminInventory />;
       case 'payroll':
@@ -94,7 +135,7 @@ const AdminDashboard: React.FC<DashboardCommonProps> = (props) => {
       sidebarNavItems={sidebarNavItems}
       activeModule={activeModule}
       setActiveModule={setActiveModule}
-      pageTitle="Branch Admin"
+      pageTitle="Branch Manager"
     >
       {renderContent()}
     </DashboardLayout>

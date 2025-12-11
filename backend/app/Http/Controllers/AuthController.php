@@ -84,4 +84,57 @@ class AuthController extends Controller
             'token' => auth()->refresh(),
         ]);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $updates = [];
+        if ($request->has('name')) $updates['name'] = $request->name;
+        if ($request->has('email')) $updates['email'] = $request->email;
+        if ($request->has('phone')) $updates['phone'] = $request->phone;
+
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user->fresh(),
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json(['message' => 'Password updated successfully']);
+    }
 }

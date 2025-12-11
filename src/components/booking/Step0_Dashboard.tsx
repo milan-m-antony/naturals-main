@@ -189,7 +189,7 @@ const Step0_Dashboard: React.FC<Step0DashboardProps> = ({
                         {/* Desktop Branding - Only show if NOT collapsed AND NOT mobile */}
                         {!collapsed && !isMobile && (
                             <div className="flex items-center gap-3 overflow-hidden animate-in fade-in duration-300">
-                                <img src="https://i.postimg.cc/9MQr6G9k/naturals-logo.jpg" alt="Naturals" className="h-8 w-8 rounded-full object-cover" />
+                                <img src="/naturals-logo.svg" alt="Naturals" className="h-8 w-8 rounded-full object-cover" />
                                 <div className="overflow-hidden whitespace-nowrap">
                                     <h2 className="font-display font-bold text-xl text-gray-900 dark:text-white leading-none tracking-tight">Naturals</h2>
                                 </div>
@@ -200,7 +200,7 @@ const Step0_Dashboard: React.FC<Step0DashboardProps> = ({
                         {isMobile && (
                              <div className="flex items-center gap-3 w-full justify-between">
                                 <div className="flex items-center gap-3">
-                                    <img src="https://i.postimg.cc/9MQr6G9k/naturals-logo.jpg" alt="Naturals" className="h-8 w-8 rounded-full object-cover" />
+                                    <img src="/naturals-logo.svg" alt="Naturals" className="h-8 w-8 rounded-full object-cover" />
                                     <h2 className="font-display font-bold text-xl text-gray-900 dark:text-white leading-none tracking-tight">Naturals</h2>
                                 </div>
                                 <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-black dark:hover:text-white">

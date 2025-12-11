@@ -17,7 +17,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate, onAdminNavigate }) => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img src="https://i.postimg.cc/9MQr6G9k/naturals-logo.jpg" alt="Naturals" className="h-10 w-10 rounded-full object-cover" />
+              <img src="/naturals-logo.svg" alt="Naturals" className="h-10 w-10 rounded-full object-cover" />
               <span className="font-display text-xl font-bold italic text-gray-900 dark:text-white">Naturals</span>
             </div>
             <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">

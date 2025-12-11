@@ -127,6 +127,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
           </div>
 
           <div className="w-full">
+            {/* Badge and Price */}
+            <div key={slide.id + '-badge'} className="inline-flex items-center gap-2 mb-6 animate-in fade-in duration-700">
+              <span className="inline-block bg-gradient-to-r from-yellow-300 to-orange-300 dark:from-yellow-600 dark:to-orange-600 text-gray-900 dark:text-white px-4 py-1.5 rounded-full text-sm font-bold">
+                {slide.badge}
+              </span>
+              <span className="text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300">
+                {slide.price}
+              </span>
+            </div>
+
             <h1 key={slide.id + '-title'} className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] xl:text-[7rem] font-display font-black italic tracking-tighter leading-[0.9] mb-4 md:mb-6 text-gray-900 dark:text-white animate-in slide-in-from-bottom-8 fade-in duration-700">
               {slide.title} <br />
               <span className="relative inline-block text-gray-800 dark:text-gray-100">

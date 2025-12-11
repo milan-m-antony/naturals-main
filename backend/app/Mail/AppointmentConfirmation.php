@@ -6,33 +6,22 @@ use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class AppointmentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Appointment $appointment)
+    public $appointment;
+
+    public function __construct(Appointment $appointment)
     {
+        $this->appointment = $appointment;
     }
 
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Appointment Confirmed - NATURALS Salon Kanjirappally',
-        );
-    }
-
-    public function content(): \Illuminate\Mail\Content
-    {
-        return new \Illuminate\Mail\Content(
-            view: 'emails.appointment_confirmation',
-        );
-    }
-
-    public function attachments(): array
-    {
-        return [];
+        return $this->subject('Appointment Confirmed - NATURALS Salon Kanjirappally')
+                    ->view('emails.appointment_confirmation');
     }
 }

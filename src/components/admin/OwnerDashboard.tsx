@@ -29,15 +29,35 @@ interface DashboardCommonProps {
 }
 
 const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
-  const { appointments, staff, getAppointmentsByBranch, updateAppointmentStatus } = useData();
+  const { 
+    appointments, 
+    staff, 
+    branches,
+    leaveRequests: dataLeaveRequests,
+    getAppointmentsByBranch, 
+    updateAppointmentStatus,
+    updateLeaveRequestStatus,
+    uploadStaffAvatar,
+    addStaff,
+    updateStaff,
+    deleteStaff,
+    toggleStaffAvailability,
+    refreshLeaveRequests
+  } = useData();
   const [activeModule, setActiveModule] = useState('overview');
 
   const branchAppointments = getAppointmentsByBranch(1);
   const [staffList, setStaffList] = useState(staff);
-  const [leaveRequests, setLeaveRequests] = useState([
-    { id: 1, name: 'Priya Sharma', dates: 'Jan 10 - Jan 12', reason: 'Family Event', status: 'Pending' },
-    { id: 2, name: 'Robert Fox', dates: 'Feb 05', reason: 'Sick Leave', status: 'Approved' }
-  ]);
+  const [leaveRequests, setLeaveRequests] = useState(dataLeaveRequests);
+
+  // Sync with context data
+  React.useEffect(() => {
+    setStaffList(staff);
+  }, [staff]);
+
+  React.useEffect(() => {
+    setLeaveRequests(dataLeaveRequests);
+  }, [dataLeaveRequests]);
   
   const getStaffName = (id: number) => staff.find(s => s.id === id)?.name || 'Unassigned';
 
@@ -47,13 +67,13 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
     { id: 'staff', label: 'Staff Management', icon: Users },
     { id: 'inventory', label: 'Inventory', icon: Box },
     { id: 'reports', label: 'Analytics & Reports', icon: FileText },
-    { id: 'services', label: 'Service Menu', icon: Sparkles },
     { id: 'reschedules', label: 'Reschedule Requests', icon: Clock },
     { 
       id: 'content', 
       label: 'Content Management', 
       icon: Layers,
       submenu: [
+        { id: 'services', label: 'Service Menu', icon: Sparkles },
         { id: 'categories', label: 'Service Categories', icon: Grid },
         { id: 'hero', label: 'Hero Carousel', icon: Layout },
         { id: 'curated', label: 'Curated Services', icon: Sparkles },
@@ -73,7 +93,22 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
       case 'appointments':
         return <AdminAppointments appointments={branchAppointments} staffList={staffList} updateAppointmentStatus={updateAppointmentStatus} getStaffName={getStaffName} />;
       case 'staff':
-        return <AdminStaff staffList={staffList} setStaffList={setStaffList} leaveRequests={leaveRequests} setLeaveRequests={setLeaveRequests} />;
+        return (
+          <AdminStaff 
+            staffList={staffList} 
+            setStaffList={setStaffList} 
+            leaveRequests={leaveRequests} 
+            setLeaveRequests={setLeaveRequests}
+            onUpdateLeaveStatus={updateLeaveRequestStatus}
+            onRefreshLeaves={refreshLeaveRequests}
+            onUploadAvatar={uploadStaffAvatar}
+            onAddStaff={addStaff}
+            onUpdateStaff={updateStaff}
+            onDeleteStaff={deleteStaff}
+            onToggleAvailability={toggleStaffAvailability}
+            branches={branches}
+          />
+        );
       case 'inventory':
         return <AdminInventory />;
       case 'reports':

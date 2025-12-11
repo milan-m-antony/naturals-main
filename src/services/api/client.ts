@@ -11,6 +11,7 @@ const apiClient: AxiosInstance = axios.create({
   },
   // Using JWT Authorization header, not cookies
   withCredentials: false,
+  timeout: 30000, // 30 second timeout
 });
 
 // Request interceptor to add auth token
@@ -33,11 +34,16 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const url = (error.config?.url || '').toLowerCase();
     const isAuthEndpoint = url.endsWith('/login') || url.endsWith('/register');
+    const isLeaveRequestsEndpoint = url.includes('/leave-requests');
 
     if (error.response?.status === 401 && !isAuthEndpoint) {
+      // Only log if it's not the expected leave-requests 401
+      if (!isLeaveRequestsEndpoint) {
+        console.warn('[API Client] 401 Unauthorized - clearing auth');
+      }
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
-      window.location.href = '/';
+      // Don't redirect - let the app handle it
     }
     return Promise.reject(error);
   }

@@ -2,10 +2,14 @@ import React from 'react';
 import AdminDashboard from './AdminDashboard';
 import StaffDashboard from './StaffDashboard';
 import OwnerDashboard from './OwnerDashboard';
+import ReceptionistDashboard from './ReceptionistDashboard';
 import { useData } from '@/store';
 
 interface AdminUser {
-  role: 'owner' | 'admin' | 'staff';
+  role: 'owner' | 'manager' | 'staff';
+  id?: number;
+  name?: string;
+  email?: string;
 }
 
 interface DashboardProps {
@@ -32,16 +36,30 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, isDarkMode, toggl
   switch (user.role) {
     case 'owner':
       return <OwnerDashboard {...commonProps} />;
-    case 'admin':
+    case 'manager':
       return (
         <AdminDashboard 
           {...commonProps}
         />
       );
-    case 'staff':
-      // For demo, we assume the logged-in staff is the 4th one (Priya) or just the first found
-      const currentStaff = staff.find(s => s.id === 4) || staff[0];
-      return <StaffDashboard {...commonProps} staffMember={currentStaff} />;
+    case 'staff': {
+      const matchedStaff = staff.find((member) => {
+        if (!user.email || !member.email) return false;
+        return member.email.toLowerCase() === user.email.toLowerCase();
+      }) || staff.find((member) => member.id === user.id) || staff[0];
+
+      if (!matchedStaff) {
+        return <div className="p-8 text-center">Loading staff data...</div>;
+      }
+
+      const roleLabel = (matchedStaff.role || '').toLowerCase();
+      const isReceptionist = roleLabel.includes('reception');
+
+      if (isReceptionist) {
+        return <ReceptionistDashboard {...commonProps} staffMember={matchedStaff} />;
+      }
+      return <StaffDashboard {...commonProps} staffMember={matchedStaff} />;
+    }
     default:
       return <div>Invalid user role.</div>;
   }
