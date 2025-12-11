@@ -6,8 +6,12 @@ use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\ServiceReview;
 use App\Models\AppointmentReschedule;
+use App\Mail\AppointmentConfirmation;
+use App\Mail\AppointmentReminder;
+use App\Mail\AppointmentRescheduled;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 
 class AppointmentController extends Controller
 {
@@ -86,6 +90,13 @@ class AppointmentController extends Controller
             $appointment->services()->attach($service['id'], [
                 'price' => $service['price'] ?? 0,
             ]);
+        }
+
+        // Send confirmation email
+        try {
+            Mail::to($appointment->user->email)->send(new AppointmentConfirmation($appointment));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -323,6 +334,14 @@ class AppointmentController extends Controller
                 'date' => $reschedule->new_date,
                 'time' => $reschedule->new_time,
             ]);
+        }
+
+        // Send email notification
+        try {
+            Mail::to($reschedule->appointment->user->email)
+                ->send(new AppointmentRescheduled($reschedule, $validated['status']));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send reschedule email: ' . $e->getMessage());
         }
 
         return response()->json([

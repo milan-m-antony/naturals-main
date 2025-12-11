@@ -15,6 +15,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\MediaLibraryController;
 use App\Http\Controllers\CuratedServiceController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +82,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Reschedule approvals (staff/admin)
     Route::patch('/reschedule-requests/{id}', [AppointmentController::class, 'approveReschedule']);
+
+    // Payment routes
+    Route::post('/payments/create-order', [PaymentController::class, 'createOrder']);
+    Route::post('/payments/verify', [PaymentController::class, 'verify']);
+    Route::get('/payments/{appointmentId}/status', [PaymentController::class, 'getStatus']);
+    Route::post('/payments/{paymentId}/refund', [PaymentController::class, 'refund']);
 
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
