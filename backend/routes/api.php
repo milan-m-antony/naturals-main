@@ -18,6 +18,7 @@ use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\BusinessConfigController;
+use App\Http\Controllers\CRMController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,20 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/memberships/subscribe', [MembershipController::class, 'subscribe']);
     Route::post('/memberships/cancel', [MembershipController::class, 'cancel']);
     Route::post('/memberships/renew', [MembershipController::class, 'renew']);
+
+    // CRM routes (authenticated users)
+    Route::get('/customers/{userId}/profile', [CRMController::class, 'getCustomerProfile']);
+    Route::get('/customers/{userId}/preferences', [CRMController::class, 'updatePreferences']);
+    Route::put('/customers/{userId}/preferences', [CRMController::class, 'updatePreferences']);
+    Route::post('/customers/{userId}/notes', [CRMController::class, 'addNote']);
+    Route::get('/customers/{userId}/notes', [CRMController::class, 'getNotes']);
+    Route::put('/customers/{userId}/notes/{noteId}', [CRMController::class, 'updateNote']);
+    Route::delete('/customers/{userId}/notes/{noteId}', [CRMController::class, 'deleteNote']);
+    Route::post('/customers/{userId}/interactions', [CRMController::class, 'logInteraction']);
+    Route::get('/customers/{userId}/interactions', [CRMController::class, 'getInteractions']);
+    Route::get('/customers/{userId}/lifecycle', [CRMController::class, 'getCustomerLifecycle']);
+    Route::get('/customers/search', [CRMController::class, 'searchCustomers']);
+    Route::get('/customers/by-preference', [CRMController::class, 'getCustomersByPreference']);
 
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
