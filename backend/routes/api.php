@@ -16,6 +16,7 @@ use App\Http\Controllers\MediaLibraryController;
 use App\Http\Controllers\CuratedServiceController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\MembershipController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,10 @@ Route::get('/media', [MediaLibraryController::class, 'index']);
 Route::get('/curated-services', [CuratedServiceController::class, 'index']);
 Route::get('/features', [FeatureController::class, 'index']);
 Route::get('/reviews', [AppointmentController::class, 'getReviews']);
+
+// Membership plans (public)
+Route::get('/membership-plans', [MembershipController::class, 'getPlans']);
+Route::get('/membership-plans/{id}', [MembershipController::class, 'getPlan']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
@@ -88,6 +93,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/payments/verify', [PaymentController::class, 'verify']);
     Route::get('/payments/{appointmentId}/status', [PaymentController::class, 'getStatus']);
     Route::post('/payments/{paymentId}/refund', [PaymentController::class, 'refund']);
+
+    // Membership routes
+    Route::get('/my-membership', [MembershipController::class, 'getUserMembership']);
+    Route::post('/memberships/subscribe', [MembershipController::class, 'subscribe']);
+    Route::post('/memberships/cancel', [MembershipController::class, 'cancel']);
+    Route::post('/memberships/renew', [MembershipController::class, 'renew']);
 
     // Admin/Owner only routes
     Route::middleware('role:admin,owner')->group(function () {
@@ -151,5 +162,11 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/features/{feature}', [FeatureController::class, 'destroy']);
         Route::patch('/features/bulk-status', [FeatureController::class, 'bulkUpdateStatus']);
         Route::patch('/features/reorder', [FeatureController::class, 'reorder']);
+
+        // Membership Plans Management
+        Route::post('/membership-plans', [MembershipController::class, 'storePlan']);
+        Route::put('/membership-plans/{plan}', [MembershipController::class, 'updatePlan']);
+        Route::delete('/membership-plans/{plan}', [MembershipController::class, 'destroyPlan']);
+        Route::get('/memberships', [MembershipController::class, 'listMemberships']);
     });
 });
