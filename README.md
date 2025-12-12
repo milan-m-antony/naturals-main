@@ -2,11 +2,9 @@
 
 Modern beauty salon booking & management system.
 
----
+## Quick Start
 
-## 🚀 Quick Start
-
-### Backend
+**Backend:**
 ```bash
 cd backend
 composer install
@@ -16,51 +14,23 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-### Frontend
+**Frontend:**
 ```bash
 npm install
 npm run dev
 ```
 
-**URLs:** Frontend: `http://localhost:3000` | Backend: `http://localhost:8000`
+**URLs:** http://localhost:3000 (frontend) | http://localhost:8000 (backend)
 
----
+## Features
 
-## ✨ Features
+**Customer:** Booking wizard | Payment (Razorpay) | User accounts | Dark mode | Responsive
 
-### Customer
-- 🗓️ Online booking (4-step wizard with animations)
-- 💳 Payment (Razorpay: Card/UPI/Venue)
-- 🔐 User accounts
-- 🌙 Dark mode
-- 📱 Responsive
+**Admin/Manager:** Dashboard | Appointments | Staff & leaves | Inventory | POS | Payroll | Reports | Coupons & Banners
 
-### Admin (Manager)
-- 📊 Dashboard
-- 📅 Appointments
-- 👥 Staff & leaves
-- 📦 Inventory
-- 💰 POS
-- 💵 Payroll
-- 📈 Reports
-- 🎟️ Coupons & Banners
+**Owner:** All admin features + Content management (Hero Carousel, Service Categories, Curated Services, Media Library) + Shop settings
 
-### Owner (All manager features +)
-- **Content Management:**
-  - Service Categories
-  - Hero Carousel
-  - Curated Services
-  - Website Features
-  - Discount Coupons
-  - Promotional Banners
-  - Media Library (separate storage per section)
-- ⚙️ Shop settings
-- 🎯 Service menu
-- 🔄 Reschedule requests
-
----
-
-## 🔑 Login
+## Login Credentials
 
 ```
 Owner:    owner@naturals.com    / owner123
@@ -68,36 +38,19 @@ Manager:  manager@naturals.com  / manager123
 Staff:    staff@naturals.com    / staff123
 ```
 
----
+## Tech Stack
 
-## 💳 Payment
+React 18 + TypeScript + Vite + Tailwind | Laravel 10 + PostgreSQL + JWT | Razorpay
 
-**Status:** Bypass mode (testing without credentials)
+## Payment Mode
 
-**Enable:**
-1. Get keys from [razorpay.com](https://razorpay.com)
-2. Add to `backend/.env`:
-   ```env
-   RAZORPAY_KEY_ID=rzp_test_xxxxx
-   RAZORPAY_KEY_SECRET=xxxxxxxxxxxxx
-   ```
-3. Set `bypassMode = false` in `src/services/razorpayService.ts`
+**Status:** Bypass mode (testing)
 
-📖 **Details:** `PAYMENT_BYPASS_MODE.md`
+**Enable production:** Add Razorpay keys to `backend/.env` and set `bypassMode = false` in `src/services/razorpayService.ts`
 
 ---
 
-## 🛠️ Tech Stack
-
-**Frontend:** React 18 + TypeScript + Vite + TailwindCSS  
-**Backend:** Laravel 10 + PostgreSQL + JWT  
-**Payment:** Razorpay PHP SDK
-
----
-
-## 📁 Structure
-
-```
+See `.github/copilot-instructions.md` for development guidelines and [CHECKLIST.md](CHECKLIST.md) for tested features.
 src/
 ├── components/
 │   ├── booking/       # Booking wizard

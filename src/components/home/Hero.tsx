@@ -1,19 +1,25 @@
+/* copilot:follow
+This module is MARKED AS DONE.
+It is protected. Do NOT modify unless the user explicitly asks.
+*/
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Star } from 'lucide-react';
+import { heroSlideService } from '@/services/api/heroSlideService';
+import type { HeroSlide } from '@/types';
 
 interface HeroProps {
   onNavigate: (page: 'home' | 'contact' | 'services' | 'about') => void;
   onBookClick: () => void;
 }
 
-const DEFAULT_SLIDES = [
+const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: 1,
     image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=1200',
     title: 'Natural',
     subtitle: 'Elegance.',
     description: 'Premium hair care that enhances your natural beauty. Expert stylists, organic products.',
-    accent: 'text-yellow-300',
+    accentColor: '#FCD34D',
     badge: 'Hair Spa',
     price: 'Starting @ ₹1500'
   },
@@ -23,7 +29,7 @@ const DEFAULT_SLIDES = [
     title: 'Radiant',
     subtitle: 'Glow.',
     description: 'Rejuvenating skin treatments designed to restore your inner shine.',
-    accent: 'text-pink-300',
+    accentColor: '#F9A8D4',
     badge: 'Facials',
     price: 'Starting @ ₹2500'
   },
@@ -33,7 +39,7 @@ const DEFAULT_SLIDES = [
     title: 'Holistic',
     subtitle: 'Peace.',
     description: 'Escape the chaos with our therapeutic spa rituals. Blend of traditional healing.',
-    accent: 'text-green-300',
+    accentColor: '#34D399',
     badge: 'Body Spa',
     price: 'Starting @ ₹3000'
   },
@@ -43,7 +49,7 @@ const DEFAULT_SLIDES = [
     title: 'Pristine',
     subtitle: 'Details.',
     description: 'Discover perfection with our meticulous manicure and pedicure services.',
-    accent: 'text-purple-300',
+    accentColor: '#C4B5FD',
     badge: 'Nail Art',
     price: 'Starting @ ₹1200'
   },
@@ -53,7 +59,7 @@ const DEFAULT_SLIDES = [
     title: 'Pure',
     subtitle: 'Essence.',
     description: 'Shop our curated collection of premium, organic beauty products.',
-    accent: 'text-teal-300',
+    accentColor: '#14B8A6',
     badge: 'Retail',
     price: 'Shop Now'
   }
@@ -61,20 +67,32 @@ const DEFAULT_SLIDES = [
 
 const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
   const [slideState, setSlideState] = useState({ current: 0, previous: null as number | null });
-  const [SLIDES, setSLIDES] = useState(DEFAULT_SLIDES);
+  const [SLIDES, setSLIDES] = useState<HeroSlide[]>(DEFAULT_SLIDES);
 
   useEffect(() => {
-    const saved = localStorage.getItem('hero_slides');
-    if (saved) {
+    let isMounted = true;
+
+    const loadSlides = async () => {
       try {
-        const slides = JSON.parse(saved);
-        if (Array.isArray(slides) && slides.length > 0) {
-          setSLIDES(slides);
+        const slides = await heroSlideService.getAll();
+        if (isMounted && Array.isArray(slides) && slides.length > 0) {
+          const normalized = slides.map((s, idx) => ({
+            ...s,
+            accentColor: s.accentColor || '#FCD34D',
+            id: s.id ?? idx,
+          }));
+          setSLIDES(normalized);
         }
       } catch (error) {
-        console.error('Failed to parse hero slides from localStorage:', error);
+        console.error('Failed to load hero slides from API:', error);
+        // fallback to defaults already set
       }
-    }
+    };
+
+    loadSlides();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -92,6 +110,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
 
   // Safely get current slide with fallback
   const slide = SLIDES[slideState.current] || SLIDES[0] || DEFAULT_SLIDES[0];
+  const accentColor = slide?.accentColor || '#FCD34D';
   
   if (!slide) {
     return null; // Safety check
@@ -139,11 +158,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
 
             <h1 key={slide.id + '-title'} className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] xl:text-[7rem] font-display font-black italic tracking-tighter leading-[0.9] mb-4 md:mb-6 text-gray-900 dark:text-white animate-in slide-in-from-bottom-8 fade-in duration-700">
               {slide.title} <br />
-              <span className="relative inline-block text-gray-800 dark:text-gray-100">
+                <span className="relative inline-block text-gray-800 dark:text-gray-100" style={{ color: accentColor }}>
                 {slide.subtitle}
-                <svg className={`absolute w-full h-3 md:h-6 -bottom-1 md:-bottom-2 left-0 -z-10 transition-colors duration-500 ${slide.accent}`} viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* FIX: Replaced malformed path data with a valid wavy line and closed the tag. */}
-                  <path d="M2 7 C 50 -3, 150 17, 198 7" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                <svg className="absolute w-full h-3 md:h-6 -bottom-1 md:-bottom-2 left-0 -z-10 transition-colors duration-500" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 7 C 50 -3, 150 17, 198 7" stroke={accentColor} strokeWidth="4" strokeLinecap="round"/>
                 </svg>
               </span>
             </h1>

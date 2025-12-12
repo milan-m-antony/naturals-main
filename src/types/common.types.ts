@@ -1,3 +1,7 @@
+/* copilot:follow
+This module is MARKED AS DONE.
+It is protected. Do NOT modify unless the user explicitly asks.
+*/
 export interface Branch {
   id: number;
   name: string;
@@ -35,3 +39,16 @@ export interface LeaveRequest {
 export type ViewType = 'home' | 'services' | 'discounts' | 'contact' | 'about' | 'membership' | 'booking' | 'admin-login';
 
 export type ThemeMode = 'light' | 'dark';
+
+export interface HeroSlide {
+  id: number;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  accentColor?: string; // hex or tailwind-compatible color string
+  badge?: string;
+  price?: string;
+  image?: string;
+  sort_order?: number;
+  is_active?: boolean;
+}
