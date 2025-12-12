@@ -94,9 +94,9 @@ const OffersPoster: React.FC<OffersPosterProps> = ({ onExplore }) => {
     };
 
   return (
-    <section className="bg-[#FDFBF7] dark:bg-neutral-950 py-6 px-6 md:px-16 lg:px-24 transition-colors duration-500">
+    <section className="bg-[#FDFBF7] dark:bg-neutral-950 py-4 px-6 md:px-16 lg:px-24 transition-colors duration-500">
         <div 
-            className="relative h-[260px] md:h-[360px] w-full max-w-7xl mx-auto overflow-hidden group bg-black rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+            className="relative h-[160px] md:h-[220px] w-full max-w-7xl mx-auto overflow-hidden group bg-black rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
@@ -113,11 +113,11 @@ const OffersPoster: React.FC<OffersPosterProps> = ({ onExplore }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 z-20"></div>
 
           {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-end items-center text-center p-6 md:p-10 text-white z-30">
+          <div className="absolute inset-0 flex flex-col justify-end items-center text-center p-4 md:p-6 text-white z-30">
             {POSTERS.map((poster, index) => (
                 <div 
                   key={poster.id}
-                  className={`max-w-2xl w-full transition-opacity duration-700 ease-out absolute bottom-6 md:bottom-10 ${index === currentIndex ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                  className={`max-w-2xl w-full transition-opacity duration-700 ease-out absolute bottom-4 md:bottom-6 ${index === currentIndex ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                 >
                   <div className="animate-in slide-in-from-bottom-4 duration-700">
                     <div className={`inline-flex items-center gap-2 ${poster.theme.tagBg} text-white px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-3 shadow-lg`}>

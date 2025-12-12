@@ -117,7 +117,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-center overflow-hidden bg-[#FDFBF7] dark:bg-neutral-950 transition-colors duration-500">
+    <div className="relative h-auto w-full flex flex-col justify-start overflow-hidden bg-[#FDFBF7] dark:bg-neutral-950 transition-colors duration-500">
       
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-pink-100/50 dark:bg-pink-900/10 rounded-full blur-[80px] md:blur-[100px] -z-10 translate-x-1/3 -translate-y-1/3 transition-all duration-1000"
@@ -127,11 +127,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
            style={{ backgroundColor: slideState.current === 0 ? '#FEF9C3' : slideState.current === 1 ? '#FAE8FF' : '#DCFCE7' }}
       ></div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full h-full flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between gap-8 lg:gap-12 pt-32 pb-10 md:pt-48">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between gap-6 lg:gap-8 pt-16 pb-8 md:pt-24 md:pb-10">
         
         {/* Text Content */}
-        <div className="lg:w-1/2 text-center lg:text-left z-10 flex flex-col justify-center items-center lg:items-start">
-          <div className="inline-flex items-center justify-center lg:justify-start gap-2 bg-white dark:bg-neutral-900 border border-gray-100 dark:border-white/10 rounded-full px-4 py-1.5 shadow-sm mb-6 lg:mb-8 w-fit transform scale-90 md:scale-100">
+        <div className="lg:w-1/2 w-full max-w-xl lg:max-w-none text-center lg:text-left z-10 flex flex-col justify-center items-center lg:items-start">
+          <div className="inline-flex items-center justify-center lg:justify-start gap-2 bg-white dark:bg-neutral-900 border border-gray-100 dark:border-white/10 rounded-full px-4 py-1.5 shadow-sm mb-4 lg:mb-6 w-fit transform scale-90 md:scale-100">
              <div className="flex -space-x-2">
                {[1,2,3].map(i => (
                  <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white dark:border-neutral-800 overflow-hidden">
@@ -147,8 +147,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
 
           <div className="w-full">
             {/* Badge and Price */}
-            <div key={slide.id + '-badge'} className="inline-flex items-center gap-2 mb-6 animate-in fade-in duration-700">
-              <span className="inline-block bg-gradient-to-r from-yellow-300 to-orange-300 dark:from-yellow-600 dark:to-orange-600 text-gray-900 dark:text-white px-4 py-1.5 rounded-full text-sm font-bold">
+            <div key={slide.id + '-badge'} className="inline-flex items-center gap-2 mb-4 animate-in fade-in duration-700">
+              <span className="inline-block bg-gradient-to-r from-yellow-300 to-orange-300 dark:from-yellow-600 dark:to-orange-600 text-gray-900 dark:text-white px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide">
                 {slide.badge}
               </span>
               <span className="text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300">
@@ -156,16 +156,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
               </span>
             </div>
 
-            <h1 key={slide.id + '-title'} className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] xl:text-[7rem] font-display font-black italic tracking-tighter leading-[0.9] mb-4 md:mb-6 text-gray-900 dark:text-white animate-in slide-in-from-bottom-8 fade-in duration-700">
-              {slide.title} <br />
+            <h1 key={slide.id + '-title'} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black italic tracking-tight leading-[1.1] mb-4 md:mb-5 text-gray-900 dark:text-white animate-in slide-in-from-bottom-8 fade-in duration-700">
+              <span className="block">{slide.title}</span>
                 <span className="relative inline-block text-gray-800 dark:text-gray-100" style={{ color: accentColor }}>
                 {slide.subtitle}
-                <svg className="absolute w-full h-3 md:h-6 -bottom-1 md:-bottom-2 left-0 -z-10 transition-colors duration-500" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg className="absolute w-full h-2 md:h-4 -bottom-0.5 md:-bottom-1 left-0 -z-10 transition-colors duration-500" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2 7 C 50 -3, 150 17, 198 7" stroke={accentColor} strokeWidth="4" strokeLinecap="round"/>
                 </svg>
               </span>
             </h1>
-            <p key={slide.id + '-desc'} className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto lg:mx-0 mb-8 md:mb-10 leading-relaxed animate-in slide-in-from-bottom-10 fade-in duration-700 delay-100">
+            <p key={slide.id + '-desc'} className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto lg:mx-0 mb-6 md:mb-8 leading-relaxed animate-in slide-in-from-bottom-10 fade-in duration-700 delay-100">
               {slide.description}
             </p>
 
@@ -187,8 +187,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
         </div>
 
         {/* Image Content */}
-        <div className="lg:w-1/2 w-full max-w-md lg:max-w-none z-10">
-          <div className="relative aspect-square">
+        <div className="lg:w-1/2 w-full max-w-md lg:max-w-lg z-10 lg:pr-16 xl:pr-24">
+          <div className="relative w-full aspect-square">
             {SLIDES.map((s, index) => {
               const isCurrent = index === slideState.current;
               const isPrevious = index === slideState.previous;
@@ -246,7 +246,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onBookClick }) => {
                     className="w-full h-full object-cover rounded-[3rem] shadow-2xl"
                     onError={(e) => {
                       // Fallback for broken images
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=1200';
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=800';
                     }}
                   />
                 </div>

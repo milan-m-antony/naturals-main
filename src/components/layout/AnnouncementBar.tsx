@@ -1,66 +1,99 @@
+/* copilot:follow
+This module is MARKED AS DONE.
+It is protected. Do NOT modify unless the user explicitly asks.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Flame, Sparkles, Clock, ArrowRight, Gift, GraduationCap, Sun } from 'lucide-react';
+import { announcementService } from '@/services/api/announcementService';
 
-interface Announcement {
+interface APIAnnouncement {
   id: number;
   text: string;
-  icon: React.ElementType;
+  icon: string;
   action: string;
-  linkTarget: string;
+  link_target: string;
+  is_active: boolean;
+}
+
+interface Announcement extends APIAnnouncement {
+  iconComponent: React.ElementType;
 }
 
 interface AnnouncementBarProps {
   onNavigate?: (view: string) => void;
 }
 
-const ANNOUNCEMENTS: Announcement[] = [
+const iconMap: { [key: string]: React.ElementType } = {
+  'Flame': Flame,
+  'Sparkles': Sparkles,
+  'Clock': Clock,
+  'Gift': Gift,
+  'GraduationCap': GraduationCap,
+  'Sun': Sun,
+};
+
+const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
   { 
-    id: 1, 
+    id: 1,
     text: "Nature Sale! Up to 50% off on all signature treatments.", 
-    icon: Flame, 
+    icon: 'Flame',
+    iconComponent: Flame, 
     action: "Book Now",
-    linkTarget: 'discounts' 
+    link_target: 'discounts',
+    is_active: true
   },
   { 
-    id: 2, 
+    id: 2,
     text: "New Bridal Packages Available. Get a free trial today!", 
-    icon: Sparkles, 
+    icon: 'Sparkles',
+    iconComponent: Sparkles, 
     action: "Explore",
-    linkTarget: 'services' 
+    link_target: 'services',
+    is_active: true
   },
   { 
-    id: 3, 
+    id: 3,
     text: "Happy Hours: 20% Off on Hair Spa (Mon-Thu, 11AM-4PM).", 
-    icon: Clock, 
+    icon: 'Clock',
+    iconComponent: Clock, 
     action: "Reserve Slot",
-    linkTarget: 'booking' 
+    link_target: 'booking',
+    is_active: true
   },
   { 
-    id: 4, 
+    id: 4,
     text: "Student Special: Flat 15% off with valid ID card.", 
-    icon: GraduationCap, 
+    icon: 'GraduationCap',
+    iconComponent: GraduationCap, 
     action: "View Details",
-    linkTarget: 'discounts' 
+    link_target: 'discounts',
+    is_active: true
   },
   { 
-    id: 5, 
+    id: 5,
     text: "Gift the glow! Digital Gift Cards now available.", 
-    icon: Gift, 
+    icon: 'Gift',
+    iconComponent: Gift, 
     action: "Buy Now",
-    linkTarget: 'services' 
+    link_target: 'services',
+    is_active: true
   },
   { 
-    id: 6, 
+    id: 6,
     text: "Weekend Glow: Free Hydrating Mask with any Facial.", 
-    icon: Sun, 
+    icon: 'Sun',
+    iconComponent: Sun, 
     action: "Book Facial",
-    linkTarget: 'booking' 
+    link_target: 'booking',
+    is_active: true
   }
 ];
 
 const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS);
   
   // Touch State for Swiping
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -68,23 +101,42 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
   const minSwipeDistance = 50;
 
   useEffect(() => {
+    loadAnnouncements();
+  }, []);
+
+  const loadAnnouncements = async () => {
+    try {
+      const data = await announcementService.getAll();
+      if (data && data.length > 0) {
+        const mapped = data.map((ann) => ({
+          ...ann,
+          iconComponent: iconMap[ann.icon] || Flame,
+        }));
+        setAnnouncements(mapped);
+      }
+    } catch (error) {
+      console.error('Failed to load announcements:', error);
+    }
+  };
+
+  useEffect(() => {
     if (isPaused) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
+      setCurrentIndex((prev) => (prev + 1) % announcements.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, announcements.length]);
 
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
+    setCurrentIndex((prev) => (prev + 1) % announcements.length);
   };
 
   const handlePrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
+    setCurrentIndex((prev) => (prev - 1 + announcements.length) % announcements.length);
   };
 
   // Swipe Handlers
@@ -105,22 +157,22 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe) {
-      setCurrentIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
+      setCurrentIndex((prev) => (prev + 1) % announcements.length);
     }
     if (isRightSwipe) {
-      setCurrentIndex((prev) => (prev - 1 + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
+      setCurrentIndex((prev) => (prev - 1 + announcements.length) % announcements.length);
     }
     
     setIsPaused(false);
   };
 
   const handleClick = () => {
-    if (onNavigate) {
-      onNavigate(ANNOUNCEMENTS[currentIndex].linkTarget);
+    if (onNavigate && announcements.length > 0) {
+      onNavigate(announcements[currentIndex].link_target);
     }
   };
 
-  const CurrentIcon = ANNOUNCEMENTS[currentIndex].icon;
+  const CurrentIcon = announcements.length > 0 ? announcements[currentIndex].iconComponent : Flame;
 
   return (
     <div 
@@ -156,12 +208,12 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
             
             {/* Text Message */}
             <p className="text-[10px] md:text-xs font-bold tracking-wide text-center truncate group-hover:text-yellow-300 transition-colors leading-none flex items-center h-full pt-[1px]">
-              {ANNOUNCEMENTS[currentIndex].text}
+              {announcements.length > 0 && announcements[currentIndex].text}
             </p>
 
             {/* Action Link - Hidden on small mobile */}
             <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-yellow-400 group-hover:text-white transition-colors h-full pt-[1px]">
-              {ANNOUNCEMENTS[currentIndex].action} <ArrowRight className="w-3 h-3" />
+              {announcements.length > 0 && announcements[currentIndex].action} <ArrowRight className="w-3 h-3" />
             </span>
           </div>
         </div>

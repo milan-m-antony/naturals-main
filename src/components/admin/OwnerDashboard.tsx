@@ -20,6 +20,7 @@ import OwnerHero from './modules/OwnerHero'; // Hero Slides Management
 import OwnerCuratedServices from './modules/OwnerCuratedServices'; // Curated Services Management
 import AdminFeatures from './modules/AdminFeatures'; // Features Management
 import AdminRescheduleRequests from './modules/AdminRescheduleRequests'; // Reschedule Requests Management
+import OwnerAnnouncements from './modules/OwnerAnnouncements'; // Announcements Management
 
 interface DashboardCommonProps {
   user: { role: string };
@@ -68,16 +69,21 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
     { id: 'inventory', label: 'Inventory', icon: Box },
     { id: 'reports', label: 'Analytics & Reports', icon: FileText },
     { id: 'reschedules', label: 'Reschedule Requests', icon: Clock },
+    
+    // Service Management - Top Level
+    { id: 'services', label: 'Service Menu', icon: Sparkles },
+    { id: 'categories', label: 'Service Categories', icon: Grid },
+    
+    // Content Management
     { 
       id: 'content', 
       label: 'Content Management', 
       icon: Layers,
       submenu: [
-        { id: 'services', label: 'Service Menu', icon: Sparkles },
-        { id: 'categories', label: 'Service Categories', icon: Grid },
         { id: 'hero', label: 'Hero Carousel', icon: Layout },
         { id: 'curated', label: 'Curated Services', icon: Sparkles },
         { id: 'features', label: 'Website Features', icon: Zap },
+        { id: 'announcements', label: 'Announcements', icon: Clock },
         { id: 'coupons', label: 'Discount Coupons', icon: Ticket },
         { id: 'banners', label: 'Promotional Banners', icon: Megaphone },
         { id: 'media', label: 'Media Library', icon: Image },
@@ -125,6 +131,8 @@ const OwnerDashboard: React.FC<DashboardCommonProps> = (props) => {
         return <OwnerCuratedServices />;
       case 'features':
         return <AdminFeatures />;
+      case 'announcements':
+        return <OwnerAnnouncements />;
       case 'coupons':
         return <OwnerCoupons />;
       case 'banners':

@@ -13,6 +13,7 @@
 
 ## ✅ Completed
 - [✅] **Hero Carousel** → [completed/hero-carousel.md](completed/hero-carousel.md)
+- [✅] **Announcements** → [completed/announcements.md](completed/announcements.md)
 
 ## 👤 Customer Features
 - [ ] Booking Wizard (4-step flow + confirmation)
@@ -26,7 +27,13 @@
 - [ ] Update Appointment Status
 - [ ] View Daily Schedule
 
-## 🔧 Admin Dashboard
+## � Receptionist Dashboard
+- [ ] Manage Customer Appointments
+- [ ] View Customer Details
+- [ ] Check Staff Availability
+- [ ] Answer Customer Inquiries
+
+## �🔧 Admin Dashboard
 - [ ] Appointments (CRUD + reschedule)
 - [ ] Staff Management
 - [ ] Inventory Management

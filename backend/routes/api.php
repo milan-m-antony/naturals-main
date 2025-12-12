@@ -18,6 +18,7 @@ use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\BusinessConfigController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CRMController;
 use App\Http\Controllers\AnalyticsController;
 
@@ -57,6 +58,9 @@ Route::get('/media', [MediaLibraryController::class, 'index']);
 Route::get('/curated-services', [CuratedServiceController::class, 'index']);
 Route::get('/features', [FeatureController::class, 'index']);
 Route::get('/reviews', [AppointmentController::class, 'getReviews']);
+
+// Public announcements
+Route::get('/announcements', [AnnouncementController::class, 'index']);
 
 // Public business config routes
 Route::get('/branches/{branchId}/business-hours', [BusinessConfigController::class, 'getBusinessHours']);
@@ -177,6 +181,11 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/promotional-banners', [PromotionalBannerController::class, 'store']);
         Route::put('/promotional-banners/{banner}', [PromotionalBannerController::class, 'update']);
         Route::delete('/promotional-banners/{banner}', [PromotionalBannerController::class, 'destroy']);
+
+        // Announcements
+        Route::post('/announcements', [AnnouncementController::class, 'store']);
+        Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update']);
+        Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy']);
 
         // Coupons
         Route::post('/coupons', [CouponController::class, 'store']);
